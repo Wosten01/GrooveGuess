@@ -1,0 +1,17 @@
+/target/
+/bin/
+/build/
+.gradle/
+*.jar
+*.war
+*.ear
+
+logs/
+*.log
+.idea/
+*.iml
+
+*.db
+*.h2.db
+.env
+application-dev.yml
