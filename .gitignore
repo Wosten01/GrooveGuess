@@ -15,3 +15,5 @@ logs/
 *.h2.db
 .env
 application-dev.yml
+
+node_modules
