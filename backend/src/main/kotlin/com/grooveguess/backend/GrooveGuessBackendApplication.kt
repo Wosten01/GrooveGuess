@@ -1,11 +1,11 @@
-package com.beatsblitz.backend
+package com.grooveguess.backend
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class BeatsBlitzBackendApplication
+class GrooveGuessBackendApplication
 
 fun main(args: Array<String>) {
-	runApplication<BeatsBlitzBackendApplication>(*args)
+	runApplication<GrooveGuessBackendApplication>(*args)
 }

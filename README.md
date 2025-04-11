@@ -1,4 +1,4 @@
-# GrooveGuess / BitsBlitz - Music Quiz Web App
+# GrooveGuess - Music Quiz Web App
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-blue.svg)](https://kotlinlang.org)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-green.svg)](https://spring.io/projects/spring-boot)

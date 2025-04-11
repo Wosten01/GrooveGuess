@@ -1,10 +1,10 @@
-package com.beatsblitz.backend
+package com.grooveguess.backend
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class BeatsBlitzBackendApplicationTests {
+class GrooveGuessBackendApplicationTests {
 
 	@Test
 	fun contextLoads() {
