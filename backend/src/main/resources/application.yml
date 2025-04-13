@@ -1,10 +1,19 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/grooveguess
+    url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: guessYourGroove
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+      enabled: true
+      locations: classpath:db/migration
+      user: postgres
+      password: guessYourGroove
+      url: jdbc:postgresql://localhost:5433/postgres
