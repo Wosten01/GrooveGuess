@@ -1,0 +1,17 @@
+FROM eclipse-temurin:21-jdk-jammy
+
+WORKDIR /app
+
+# Устанавливаем Gradle
+RUN apt-get update && apt-get install -y gradle
+
+# Копируем только файлы для зависимостей (оптимизация кэша)
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
+
+# Устанавливаем зависимости
+RUN ./gradlew dependencies --no-daemon
+
+CMD ["./gradlew", "bootRun"]

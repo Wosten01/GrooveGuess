@@ -15,6 +15,10 @@ java {
 	}
 }
 
+tasks.getByName<Jar>("jar") {
+    enabled = false
+}
+
 repositories {
 	mavenCentral()
 }
@@ -35,11 +39,6 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
-}
 
 allOpen {
 	annotation("jakarta.persistence.Entity")
@@ -49,4 +48,10 @@ allOpen {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
