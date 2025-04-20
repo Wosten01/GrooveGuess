@@ -28,4 +28,9 @@ class UserService(private val userRepository: UserRepository) {
     fun delete(id: Long) {
         userRepository.deleteById(id)
     }
+
+    fun isAdmin(userId: Long): Boolean {
+        val user = find(userId)
+        return user.role == "ADMIN"
+    }
 }
