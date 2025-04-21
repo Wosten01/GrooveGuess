@@ -1,0 +1,126 @@
+
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start-postgres",
+      "type": "shell",
+      "command": "docker-compose up -d",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "start-backend",
+      "type": "shell",
+      "command": "./gradlew bootRun",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "start-frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "start-all",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "start-postgres",
+        "start-backend",
+        "start-frontend"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "stop-postgres",
+      "type": "shell",
+      "command": "docker-compose down",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "stop-backend",
+      "type": "shell",
+      "command": "pkill -f 'GradleMain' || pkill -f 'bootRun' || true",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "stop-frontend",
+      "type": "shell",
+      "command": "pkill -f 'npm run dev' || pkill -f 'vite' || true",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "stop-all",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "stop-postgres",
+        "stop-backend",
+        "stop-frontend"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
