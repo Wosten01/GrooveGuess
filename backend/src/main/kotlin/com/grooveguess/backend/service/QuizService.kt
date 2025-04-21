@@ -8,6 +8,7 @@ import com.grooveguess.backend.domain.repository.QuizRepository
 import com.grooveguess.backend.domain.dto.AnswerResponse
 import com.grooveguess.backend.service.UserService
 import org.springframework.stereotype.Service
+import com.grooveguess.backend.domain.enum.AnswerStatus
 
 @Service
 class QuizService(

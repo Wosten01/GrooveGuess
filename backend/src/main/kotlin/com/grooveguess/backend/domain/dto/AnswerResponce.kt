@@ -1,6 +1,7 @@
 package com.grooveguess.backend.domain.dto
 
-import AnswerStatus
+import com.grooveguess.backend.domain.enum.AnswerStatus
+
 
 data class AnswerResponse(
     val status: AnswerStatus,
