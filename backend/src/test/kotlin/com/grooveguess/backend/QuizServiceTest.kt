@@ -1,9 +1,10 @@
-package com.grooveguess.service
+package com.grooveguess.backend.service
 
-import com.grooveguess.domain.model.Quiz
-import com.grooveguess.domain.model.Track
-import com.grooveguess.domain.model.User
-import com.grooveguess.domain.repository.QuizRepository
+import com.grooveguess.backend.domain.model.Quiz
+import com.grooveguess.backend.domain.model.Track
+import com.grooveguess.backend.domain.model.User
+import com.grooveguess.backend.domain.repository.QuizRepository
+import com.grooveguess.backend.domain.repository.TrackRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -12,9 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import java.util.Optional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.stubbing.Answer
+import AnswerStatus
 
 @ExtendWith(MockitoExtension::class)
 class QuizServiceTest {
@@ -24,6 +29,9 @@ class QuizServiceTest {
 
     @Mock
     private lateinit var userService: UserService
+
+    @Mock
+    private lateinit var trackRepository: TrackRepository
 
     @InjectMocks
     private lateinit var quizService: QuizService
@@ -67,18 +75,48 @@ class QuizServiceTest {
     }
 
     @Test
-    fun `submitAnswer should add 10 points for correct answer`() {
+    fun `submitAnswer returns CORRECT when selected track is correct`() {
         val user = User(id = 1, username = "user", password = "pass", role = "USER", email = "user@example.com", score = 50)
         val track = Track(id = 1, title = "Song", artist = "Artist", url = "http://example.com")
         val quiz = Quiz(id = 1, title = "Test Quiz", description = "Desc", roundCount = 1, tracks = listOf(track))
-        val updatedUser = user.copy(score = 60)
-        whenever(quizRepository.findById(1L)).thenReturn(Optional.of(quiz))
-        whenever(userService.find(1L)).thenReturn(user)
-        whenever(userService.update(1L, updatedUser)).thenReturn(updatedUser)
 
-        val result = quizService.submitAnswer(1L, 1L, 1L, true)
+        val quizId = quiz.id
+        val userId = user.id
+        val selectedTrackId = track.id
+        val correctTrackId = track.id
 
-        assertEquals(60, result)
-        verify(userService).update(1L, argThat { this.score == 60 })
+        whenever(quizRepository.findById(quizId)).thenReturn(Optional.of(quiz))
+        whenever(userService.find(userId)).thenReturn(user)
+        whenever(userService.update(eq(userId), any())).thenAnswer { invocation ->
+            val updatedUser = invocation.getArgument(1) as User
+            whenever(userService.find(userId)).thenReturn(updatedUser)
+            updatedUser
+        }
+
+        val result = quizService.submitAnswer(quizId, userId, selectedTrackId, correctTrackId)
+
+        assertEquals(AnswerStatus.CORRECT, result.status)
+        assertEquals(60, userService.find(userId).score)
+    }
+
+    @Test
+    fun `submitAnswer returns INCORRECT when selected track is incorrect`() {
+        val user = User(id = 1, username = "user", password = "pass", role = "USER", email = "user@example.com", score = 50)
+        val track = Track(id = 1, title = "Song", artist = "Artist", url = "http://example.com")
+        val track2 = Track(id = 2, title = "Song2", artist = "Artist2", url = "http://example2.com")
+        val quiz = Quiz(id = 1, title = "Test Quiz", description = "Desc", roundCount = 1, tracks = listOf(track, track2))
+
+        val quizId = quiz.id
+        val userId = user.id
+        val selectedTrackId = track.id
+        val correctTrackId = track2.id
+
+        whenever(quizRepository.findById(quizId)).thenReturn(Optional.of(quiz))
+        whenever(userService.find(userId)).thenReturn(user)
+
+        val result = quizService.submitAnswer(quizId, userId, selectedTrackId, correctTrackId)
+
+        assertEquals(AnswerStatus.INCORRECT, result.status)
+        assertEquals(50, userService.find(userId).score)
     }
 }

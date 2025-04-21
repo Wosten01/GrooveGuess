@@ -1,2 +1,1 @@
-export * from "./QuizCard"
 export * from "./QuizPlayer"

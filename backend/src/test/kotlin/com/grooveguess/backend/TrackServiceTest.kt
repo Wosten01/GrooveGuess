@@ -1,8 +1,8 @@
-package com.grooveguess.service
+package com.grooveguess.backend.service
 
-import com.grooveguess.domain.model.Track
-import com.grooveguess.domain.model.User
-import com.grooveguess.domain.repository.TrackRepository
+import com.grooveguess.backend.domain.model.Track
+import com.grooveguess.backend.domain.model.User
+import com.grooveguess.backend.domain.repository.TrackRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks

@@ -1,7 +1,8 @@
-package com.grooveguess.service
+package com.grooveguess.backend.service
 
-import com.grooveguess.domain.model.Track
-import com.grooveguess.domain.repository.TrackRepository
+import com.grooveguess.backend.domain.model.Track
+import com.grooveguess.backend.domain.repository.TrackRepository
+import com.grooveguess.backend.service.UserService
 import org.springframework.stereotype.Service
 
 @Service
@@ -39,4 +40,4 @@ class TrackService(private val trackRepository: TrackRepository, private val use
         }
         trackRepository.deleteById(id)
     }
-}w
+}

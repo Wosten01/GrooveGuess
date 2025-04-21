@@ -1,6 +1,6 @@
-package com.grooveguess.domain.repository
+package com.grooveguess.backend.domain.repository
 
-import com.grooveguess.domain.model.User
+import com.grooveguess.backend.domain.model.User
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRepository : JpaRepository<User, Long>

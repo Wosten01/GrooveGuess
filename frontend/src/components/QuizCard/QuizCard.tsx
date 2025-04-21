@@ -1,8 +1,8 @@
-import { Button } from '@mui/material';
 import { FC } from 'react';
+import { Button, Card, CardContent, Typography } from '@mui/material';
 
-export interface Quiz {
-  id: string;
+interface Quiz {
+  id: number;
   title: string;
   description?: string;
   roundCount: number;
@@ -10,20 +10,31 @@ export interface Quiz {
 
 interface QuizCardProps {
   quiz: Quiz;
+  onStart: () => void;
 }
 
-export const QuizCard: FC<QuizCardProps> = ({ quiz }) => {
-  const startQuiz = () => {
-    console.log('Quiz started');
-  };
-
+export const QuizCard: FC<QuizCardProps> = ({ quiz, onStart }) => {
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-semibold text-gray-800">{quiz.title}</h2>
-      <p className="text-gray-600">{quiz.description}</p>
-      <Button variant="contained" onClick={startQuiz} sx={{ mt: 2, textTransform: 'none' }}>
-        Start Quiz
-      </Button>
-    </div>
+    <Card className="max-w-md mx-auto">
+      <CardContent>
+        <Typography variant="h5" className="font-semibold text-gray-800">
+          {quiz.title}
+        </Typography>
+        <Typography variant="body2" className="text-gray-600 mt-2">
+          {quiz.description || 'No description'}
+        </Typography>
+        <Typography variant="body2" className="text-gray-600 mt-1">
+          Rounds: {quiz.roundCount}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={onStart}
+          sx={{ mt: 2, textTransform: 'none' }}
+          className="w-full"
+        >
+          Start Quiz
+        </Button>
+      </CardContent>
+    </Card>
   );
 };

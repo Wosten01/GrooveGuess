@@ -1,0 +1,23 @@
+package com.grooveguess.backend.domain.model
+
+import jakarta.persistence.*
+
+@Entity
+@Table(name = "quizzes")
+data class Quiz(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+
+    val title: String,
+    val description: String?,
+    val roundCount: Int,
+
+    @ManyToMany
+    @JoinTable(
+        name = "quiz_tracks",
+        joinColumns = [JoinColumn(name = "quiz_id")],
+        inverseJoinColumns = [JoinColumn(name = "track_id")]
+    )
+    val tracks: List<Track> = emptyList()
+)

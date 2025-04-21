@@ -1,4 +1,4 @@
-package com.grooveguess.backend
+package com.grooveguess.backend.api.controller
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
