@@ -82,7 +82,7 @@ class QuizServiceTest {
         val quiz = Quiz(id = 1L, title = "Test Quiz", description = "Desc", roundCount = 1, tracks = listOf(track))
 
         val quizId = quiz.id
-        val userId = user.id!!
+        val userId = user.id
         val selectedTrackId = track.id
         val correctTrackId = track.id
 
@@ -108,7 +108,7 @@ class QuizServiceTest {
         val quiz = Quiz(id = 1L, title = "Test Quiz", description = "Desc", roundCount = 1, tracks = listOf(track, track2))
 
         val quizId = quiz.id
-        val userId = user.id!!
+        val userId = user.id
         val selectedTrackId = track.id
         val correctTrackId = track2.id
 

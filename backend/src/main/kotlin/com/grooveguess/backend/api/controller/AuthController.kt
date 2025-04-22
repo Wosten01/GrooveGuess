@@ -12,6 +12,8 @@ import com.grooveguess.backend.domain.repository.UserRepository
 import com.grooveguess.backend.domain.enum.Role
 import com.grooveguess.backend.service.UserService
 import com.grooveguess.backend.domain.dto.Message
+import com.grooveguess.backend.util.JwtUtil
+import com.grooveguess.backend.util.CookieUtils
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.Jwts
 import java.util.Date
@@ -28,8 +30,8 @@ class AuthController(
     private val userService: UserService,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    @Value("\${jwt.secret}") private val jwtSecret: String,
-    @Value("\${jwt.expirationMs}") private val jwtExpirationMs: Long
+    private val jwtUtil: JwtUtil,
+    private val cookieUtils: CookieUtils,
 ) {
 
     @PostMapping("/login")
@@ -47,23 +49,8 @@ class AuthController(
             return ResponseEntity.status(401).body(Message("Invalid credentials"))
         }
 
-        val issuer = user.id.toString()
-
-        val key = SecretKeySpec(jwtSecret.toByteArray(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.jcaName)
-        val jwt = Jwts.builder()
-            .setSubject(user.email)
-            .setIssuer(issuer)
-            .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + jwtExpirationMs))
-            .signWith(key, SignatureAlgorithm.HS256)
-            .compact()
-
-        val cookie = Cookie("jwt", jwt)
-        
-        cookie.isHttpOnly = true
-        cookie.path = "/"
-
-        response.addCookie(cookie)
+        val token = jwtUtil.generateToken(user)
+        cookieUtils.addJwtCookie(response, token)
 
         return ResponseEntity.ok(Message("Successfully login"))
     }
@@ -95,19 +82,22 @@ class AuthController(
     }
 
     @GetMapping("/me")
-    fun validate(@CookieValue("jwt") jwt: String?): ResponseEntity<Any>{
-        if (jwt == null) {
+    fun validate(@CookieValue("jwt") token: String?): ResponseEntity<Any> {
+        if (token == null) {
             return ResponseEntity.status(401).body(Message("Unauthenticated"))
         }
         return try {
-            val key = SecretKeySpec(jwtSecret.toByteArray(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.jcaName)
-            val body = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(jwt)
-                .body
-            ResponseEntity.ok(body)
-            ResponseEntity.ok(this.userService.findById(body.issuer.toLong()))
+            val issuer = jwtUtil.getIssuerFromToken(token)
+            if (issuer == null) {
+                return ResponseEntity.status(401).body(Message("Invalid or expired token"))
+            }
+
+            val user = this.userService.findById(issuer)
+            if (user == null) {
+                ResponseEntity.status(404).body(Message("User not found"))
+            }                
+            return ResponseEntity.ok(user)
+
         } catch (e: JwtException) {
             ResponseEntity.status(401).body(Message("Invalid or expired token"))
         }

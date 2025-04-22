@@ -1,4 +1,4 @@
-package com.grooveguess.backend.security
+package com.grooveguess.backend.util
 
 import com.grooveguess.backend.domain.model.User
 import io.jsonwebtoken.Jwts
@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Value
 import java.util.*
+import java.nio.charset.StandardCharsets
 import javax.crypto.spec.SecretKeySpec
 
 @Component
@@ -14,24 +15,22 @@ class JwtUtil(
     @Value("\${jwt.secret}") private val jwtSecret: String,
     @Value("\${jwt.expirationMs}") private val jwtExpirationMs: Long
 ) {
-    // private val jwtSecret = "your-very-secret-key"
-    // private val jwtExpirationMs 
-    // private val jwtExpirationMs = 24 * 60 * 60 * 1000 // 24 hours
-    private val key = SecretKeySpec(jwtSecret.toByteArray(), SignatureAlgorithm.HS256.jcaName)
-
+    private val key  = SecretKeySpec(jwtSecret.toByteArray(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.jcaName)
+    
     fun generateToken(user: User): String {
         val claims = Jwts.claims().apply {
-            subject = user.id?.toString() ?: ""
             this["role"] = user.role.name
-            this["email"] = user.email
+            this["score"] = user.score
         }
-        val now = Date()
-        val expiryDate = Date(now.time + jwtExpirationMs)
+
+        val issuer = user.email
 
         return Jwts.builder()
             .setClaims(claims)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
+            .setSubject("GrooveGuess-backend")
+            .setIssuer(issuer)
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + jwtExpirationMs))
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
     }
@@ -40,6 +39,15 @@ class JwtUtil(
         return try {
             val claims = getClaims(token)
             claims.subject.toLongOrNull()
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+    fun getIssuerFromToken(token: String): Long? {
+        return try {
+            val claims = getClaims(token)
+            claims.issuer.toLong()
         } catch (ex: Exception) {
             null
         }
