@@ -18,11 +18,19 @@ data class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     var id: Long? = null,
+
+    @Column(nullable = false)
     val username: String,
-    @Column(unique = true)
+
+    @Column(nullable = false, unique = true)
     val email: String,
+
+    @Column(nullable = false)
     val password: String,
+
     @Enumerated(EnumType.STRING)
     val role: Role = Role.USER,
+
+    
     val score: Int = 0
 )

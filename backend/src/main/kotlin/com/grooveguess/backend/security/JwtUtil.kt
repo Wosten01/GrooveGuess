@@ -5,13 +5,17 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.Claims
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Value
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 @Component
-class JwtUtil {
-    private val jwtSecret = "your-very-secret-key"
-    private val jwtExpirationMs = 5 * 60 * 1000 // 5 minutes
+class JwtUtil(
+    @Value("\${jwt.secret}") private val jwtSecret: String,
+    @Value("\${jwt.expirationMs}") private val jwtExpirationMs: Long
+) {
+    // private val jwtSecret = "your-very-secret-key"
+    // private val jwtExpirationMs 
     // private val jwtExpirationMs = 24 * 60 * 60 * 1000 // 24 hours
     private val key = SecretKeySpec(jwtSecret.toByteArray(), SignatureAlgorithm.HS256.jcaName)
 

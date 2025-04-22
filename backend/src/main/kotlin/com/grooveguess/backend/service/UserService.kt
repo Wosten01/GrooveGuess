@@ -6,12 +6,12 @@ import com.grooveguess.backend.domain.enum.Role
 import com.grooveguess.backend.domain.dto.RegisterRequest
 import com.grooveguess.backend.domain.dto.LoginRequest
 import org.springframework.stereotype.Service
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: BCryptPasswordEncoder
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     fun create(user: User): User = userRepository.save(user)
