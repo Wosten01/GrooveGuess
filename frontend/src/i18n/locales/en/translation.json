@@ -1,0 +1,9 @@
+{
+    "pages" :{
+        "home": {
+            "welcome": "Welcome to GrooveGuess!",
+            "description": "This is a simple music quiz app. Start the game and test your knowledge!",
+            "start": "Start Game"
+        }
+    }
+}

@@ -1,0 +1,29 @@
+
+.sway-note {
+  animation: swayNote 2.8s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes swayNote {
+  0% {
+    transform: rotate(-18deg) translateY(0);
+  }
+  15% {
+    transform: rotate(-10deg) translateY(-2px);
+  }
+  30% {
+    transform: rotate(0deg) translateY(-4px);
+  }
+  50% {
+    transform: rotate(18deg) translateY(0);
+  }
+  70% {
+    transform: rotate(0deg) translateY(4px);
+  }
+  85% {
+    transform: rotate(-10deg) translateY(2px);
+  }
+  100% {
+    transform: rotate(-18deg) translateY(0);
+  }
+}
