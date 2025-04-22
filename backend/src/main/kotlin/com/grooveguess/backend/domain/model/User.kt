@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Table
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.enum.Role
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 
 @Entity
@@ -26,6 +27,7 @@ data class User(
     @Column(nullable = false, unique = true)
     val email: String,
 
+    @JsonIgnore
     @Column(nullable = false)
     val password: String,
 

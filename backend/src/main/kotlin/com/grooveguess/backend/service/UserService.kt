@@ -19,6 +19,8 @@ class UserService(
     fun find(id: Long): User = userRepository.findById(id)
         .orElseThrow { RuntimeException("User not found") }
 
+    fun findById(id: Long): User? = userRepository.findById(id).orElse(null)
+
     fun findByEmail(email: String): User? = userRepository.findByEmail(email)
 
     fun update(id: Long, updatedUser: User): User? {

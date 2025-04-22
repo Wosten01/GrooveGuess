@@ -18,6 +18,9 @@ import java.util.Date
 import java.nio.charset.StandardCharsets
 import javax.crypto.spec.SecretKeySpec
 import java.util.Base64
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletResponse
+import io.jsonwebtoken.JwtException
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,7 +33,7 @@ class AuthController(
 ) {
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginDTO): ResponseEntity<Any> {
+    fun login(@RequestBody request: LoginDTO, response: HttpServletResponse): ResponseEntity<Message> {
         if (request.email.isBlank() || !request.email.contains("@")) {
             return ResponseEntity.badRequest().body(Message("Invalid email format"))
         }
@@ -55,7 +58,14 @@ class AuthController(
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
 
-        return ResponseEntity.ok(AuthResponse(token = jwt, Message("Successfully login")))
+        val cookie = Cookie("jwt", jwt)
+        
+        cookie.isHttpOnly = true
+        cookie.path = "/"
+
+        response.addCookie(cookie)
+
+        return ResponseEntity.ok(Message("Successfully login"))
     }
 
     @PostMapping("/register")
@@ -82,5 +92,34 @@ class AuthController(
         )
         userService.create(user)
         return ResponseEntity.ok(Message("Successfully register"))
+    }
+
+    @GetMapping("/me")
+    fun validate(@CookieValue("jwt") jwt: String?): ResponseEntity<Any>{
+        if (jwt == null) {
+            return ResponseEntity.status(401).body(Message("Unauthenticated"))
+        }
+        return try {
+            val key = SecretKeySpec(jwtSecret.toByteArray(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.jcaName)
+            val body = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(jwt)
+                .body
+            ResponseEntity.ok(body)
+            ResponseEntity.ok(this.userService.findById(body.issuer.toLong()))
+        } catch (e: JwtException) {
+            ResponseEntity.status(401).body(Message("Invalid or expired token"))
+        }
+    }
+
+    @PostMapping ("/logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<Any> {
+        val cookie = Cookie("jwt", "")
+        cookie.maxAge = 0
+        cookie.path = "/"
+        cookie.isHttpOnly = true 
+        response.addCookie(cookie)
+        return ResponseEntity.ok(Message("success"))
     }
 }
