@@ -3,8 +3,8 @@ package com.grooveguess.backend.service
 import com.grooveguess.backend.domain.model.User
 import com.grooveguess.backend.domain.repository.UserRepository
 import com.grooveguess.backend.domain.enum.Role
-import com.grooveguess.backend.domain.dto.RegisterRequest
-import com.grooveguess.backend.domain.dto.LoginRequest
+import com.grooveguess.backend.domain.dto.RegisterDTO
+import com.grooveguess.backend.domain.dto.LoginDTO
 import org.springframework.stereotype.Service
 import org.springframework.security.crypto.password.PasswordEncoder
 
@@ -18,6 +18,8 @@ class UserService(
 
     fun find(id: Long): User = userRepository.findById(id)
         .orElseThrow { RuntimeException("User not found") }
+
+    fun findByEmail(email: String): User? = userRepository.findByEmail(email)
 
     fun update(id: Long, updatedUser: User): User? {
         return userRepository.findById(id).map {
@@ -41,26 +43,7 @@ class UserService(
         return user.role == Role.ADMIN
     }
 
-    fun login(request: LoginRequest): User {
-        val user = userRepository.findByEmail(request.email)
-            ?: throw IllegalArgumentException("Invalid credentials")
-        if (!passwordEncoder.matches(request.password, user.password)) {
-            throw IllegalArgumentException("Invalid credentials")
-        }
-        return user
-    }
-
-    fun register(request: RegisterRequest): User {
-        if (userRepository.findByEmail(request.email) != null) {
-            throw IllegalArgumentException("Email already exists")
-        }
-        val user = User(
-            username = request.username,
-            email = request.email,
-            password = passwordEncoder.encode(request.password),
-            role = Role.USER,
-            score = 0
-        )
-        return create(user)
+    fun comparePassword(user: User, rawPassword: String): Boolean {
+        return passwordEncoder.matches(rawPassword, user.password)
     }
 }

@@ -4,8 +4,7 @@ package com.grooveguess.backend.service
 import com.grooveguess.backend.domain.model.User
 import com.grooveguess.backend.domain.enum.Role
 import com.grooveguess.backend.domain.repository.UserRepository
-import com.grooveguess.backend.domain.dto.RegisterRequest
-import com.grooveguess.backend.domain.dto.LoginRequest
+import com.grooveguess.backend.domain.dto.LoginDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -29,7 +28,7 @@ class UserServiceTest {
 
     @Test
     fun `create should save and return user`() {
-        val user = User(id = null, username = "test", password = "pass", role = Role.USER, email = "test@example.com", score = 0)
+        val user = User(username = "test", password = "pass", role = Role.USER, email = "test@example.com", score = 0)
         val savedUser = user.copy(id = 1L)
         whenever(userRepository.save(user)).thenReturn(savedUser)
 
@@ -114,81 +113,5 @@ class UserServiceTest {
 
         assertFalse(result)
         verify(userRepository).findById(1L)
-    }
-
-    @Test
-    fun `login should return user when credentials are correct`() {
-        val user = User(id = 1L, username = "test", password = "hashed", role = Role.USER, email = "test@example.com", score = 0)
-        val request = LoginRequest(email = "test@example.com", password = "plain")
-        whenever(userRepository.findByEmail("test@example.com")).thenReturn(user)
-        whenever(passwordEncoder.matches("plain", "hashed")).thenReturn(true)
-
-        val result = userService.login(request)
-
-        assertEquals(user, result)
-        verify(userRepository).findByEmail("test@example.com")
-        verify(passwordEncoder).matches("plain", "hashed")
-    }
-
-    @Test
-    fun `login should throw exception when user not found`() {
-        val request = LoginRequest(email = "notfound@example.com", password = "plain")
-        whenever(userRepository.findByEmail("notfound@example.com")).thenReturn(null)
-
-        val exception = assertThrows<IllegalArgumentException> {
-            userService.login(request)
-        }
-
-        assertEquals("Invalid credentials", exception.message)
-        verify(userRepository).findByEmail("notfound@example.com")
-    }
-
-    @Test
-    fun `login should throw exception when password does not match`() {
-        val user = User(id = 1L, username = "test", password = "hashed", role = Role.USER, email = "test@example.com", score = 0)
-        val request = LoginRequest(email = "test@example.com", password = "wrong")
-        whenever(userRepository.findByEmail("test@example.com")).thenReturn(user)
-        whenever(passwordEncoder.matches("wrong", "hashed")).thenReturn(false)
-
-        val exception = assertThrows<IllegalArgumentException> {
-            userService.login(request)
-        }
-
-        assertEquals("Invalid credentials", exception.message)
-        verify(userRepository).findByEmail("test@example.com")
-        verify(passwordEncoder).matches("wrong", "hashed")
-    }
-
-    @Test
-    fun `register should save and return user when email is unique`() {
-        val request = RegisterRequest(username = "test", email = "test@example.com", password = "plain")
-        whenever(userRepository.findByEmail("test@example.com")).thenReturn(null)
-        whenever(passwordEncoder.encode("plain")).thenReturn("hashed")
-        val userToSave = User(username = "test", email = "test@example.com", password = "hashed", role = Role.USER, score = 0)
-        val savedUser = userToSave.copy(id = 1L)
-        whenever(userRepository.save(userToSave)).thenReturn(savedUser)
-
-        val result = userService.register(request)
-
-        assertEquals(savedUser, result)
-        verify(userRepository).findByEmail("test@example.com")
-        verify(passwordEncoder).encode("plain")
-        verify(userRepository).save(userToSave)
-    }
-
-    @Test
-    fun `register should throw exception when email already exists`() {
-        val request = RegisterRequest(username = "test", email = "test@example.com", password = "plain")
-        val existingUser = User(id = 1L, username = "test", password = "hashed", role = Role.USER, email = "test@example.com", score = 0)
-        whenever(userRepository.findByEmail("test@example.com")).thenReturn(existingUser)
-
-        val exception = assertThrows<IllegalArgumentException> {
-            userService.register(request)
-        }
-
-        assertEquals("Email already exists", exception.message)
-        verify(userRepository).findByEmail("test@example.com")
-        verify(passwordEncoder, never()).encode(any())
-        verify(userRepository, never()).save(any())
     }
 }

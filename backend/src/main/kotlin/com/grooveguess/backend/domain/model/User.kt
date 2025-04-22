@@ -7,20 +7,21 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Column
 import jakarta.persistence.Enumerated
 import jakarta.persistence.EnumType
+import jakarta.persistence.Table
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.enum.Role
 
 
-
 @Entity
+@Table(name = "users")
 data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    var id: Long? = null,
+    var id: Long = 0,
 
     @Column(nullable = false)
-    val username: String,
+    val username: String = "",
 
     @Column(nullable = false, unique = true)
     val email: String,
@@ -31,6 +32,6 @@ data class User(
     @Enumerated(EnumType.STRING)
     val role: Role = Role.USER,
 
-    
+    @Column()
     val score: Int = 0
 )

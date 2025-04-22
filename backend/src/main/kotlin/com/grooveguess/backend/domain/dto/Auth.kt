@@ -1,16 +1,17 @@
 package com.grooveguess.backend.domain.dto
 
-data class RegisterRequest(
+data class RegisterDTO(
     val email: String,
     val username: String,
     val password: String
 )
 
-data class LoginRequest(
+data class LoginDTO(
     val email: String,
     val password: String
 )
 
 data class AuthResponse(
-    val token: String
+    val token: String,
+    val message: Message
 )
