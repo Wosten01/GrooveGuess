@@ -4,6 +4,33 @@
             "welcome": "Welcome to GrooveGuess!",
             "description": "This is a simple music quiz app. Start the game and test your knowledge!",
             "start": "Start Game"
+        },
+        "login": {
+            "title": "Login",
+            "email": "Email",
+            "password": "Password",
+            "submit": "Sign In",
+            "errors": {
+                "email": "Invalid email",
+                "emailRequired": "Required",
+                "passwordMin": "At least 6 characters",
+                "passwordRequired": "Required"
+            }
+        },
+        "register": {
+            "title": "Register",
+            "username": "Username",
+            "email": "Email",
+            "password": "Password",
+            "submit": "Sign Up",
+            "errors": {
+                "usernameMin": "At least 3 characters",
+                "usernameRequired": "Required",
+                "email": "Invalid email",
+                "emailRequired": "Required",
+                "passwordMin": "At least 6 characters",
+                "passwordRequired": "Required"
+            }
         }
     }
 }

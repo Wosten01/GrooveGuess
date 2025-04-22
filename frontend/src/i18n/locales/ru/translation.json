@@ -1,9 +1,36 @@
 {
-    "pages" :{
-        "home": {
-            "welcome": "Добро пожаловать в GrooveGuess!",
-            "description": "Это простое приложение для викторин по музыке. Начните игру и проверьте свои знания!",
-            "start": "Начать игру"
-        }
+  "pages": {
+    "home": {
+      "welcome": "Добро пожаловать в GrooveGuess!",
+      "description": "Это простое приложение для викторин по музыке. Начните игру и проверьте свои знания!",
+      "start": "Начать игру"
+    },
+    "login": {
+      "title": "Вход",
+      "email": "Email",
+      "password": "Пароль",
+      "submit": "Войти",
+      "errors": {
+        "email": "Некорректный email",
+        "emailRequired": "Обязательное поле",
+        "passwordMin": "Минимум 6 символов",
+        "passwordRequired": "Обязательное поле"
+      }
+    },
+    "register": {
+      "title": "Регистрация",
+      "username": "Имя пользователя",
+      "email": "Email",
+      "password": "Пароль",
+      "submit": "Зарегистрироваться",
+      "errors": {
+        "usernameMin": "Минимум 3 символа",
+        "usernameRequired": "Обязательное поле",
+        "email": "Некорректный email",
+        "emailRequired": "Обязательное поле",
+        "passwordMin": "Минимум 6 символов",
+        "passwordRequired": "Обязательное поле"
+      }
     }
+  }
 }
