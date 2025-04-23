@@ -1,3 +1,4 @@
+
 import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -5,6 +6,9 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -24,6 +28,13 @@ export const MainAppBar: React.FC = () => {
 
   const isLogin = location.pathname === "/login";
   const isRegister = location.pathname === "/register";
+
+  // Пример обработчика выхода
+  const handleLogout = () => {
+    // Здесь должна быть ваша логика выхода
+    // Например: auth.logout(); navigate('/login');
+    alert("Выход из аккаунта");
+  };
 
   return (
     <AppBar
@@ -51,8 +62,7 @@ export const MainAppBar: React.FC = () => {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
+              gap: 1.5,
               userSelect: "none",
             }}
           >
@@ -60,6 +70,16 @@ export const MainAppBar: React.FC = () => {
               {user.name}
             </Typography>
             <Avatar src={user.avatarUrl}>{user.name[0]}</Avatar>
+            <Tooltip title={t("features.logout.title")}>
+              <IconButton
+                aria-label={t("features.logout.title")}
+                onClick={handleLogout}
+                color="primary"
+                sx={{ ml: 1 }}
+              >
+                <LogoutOutlinedIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         ) : (
           <Box sx={{ display: "flex", gap: 1 }}>

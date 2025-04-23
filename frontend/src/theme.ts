@@ -38,16 +38,18 @@ export const theme = createTheme({
       contrastText: '#388e3c',
     },
     background: {
-      default: '#e0f7fa',
-      paper: '#fff',
+      default: '#E8ECEF',
+      paper: '#f8f8ff',
     },
   },
+  
   typography: {
     fontFamily: "'Montserrat', 'Roboto', sans-serif",
     h4: {
       fontWeight: 700,
       fontSize: '2.2rem',
       letterSpacing: '-0.5px',
+      color: '#43a047',
     },
     body1: {
       fontSize: '1.15rem',

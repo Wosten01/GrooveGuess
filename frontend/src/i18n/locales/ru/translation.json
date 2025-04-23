@@ -36,6 +36,9 @@
   "features": {
         "logo" : {
             "name": "GrooveGuess"
+        },
+        "logout": {
+            "title": "Выйти"
         }
     }
 }
