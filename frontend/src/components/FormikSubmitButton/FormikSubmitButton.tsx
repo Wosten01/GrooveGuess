@@ -25,7 +25,8 @@ export const FormikSubmitButton: React.FC<Props> = ({
       disabled={loading || disabled}
       sx={{
         mt: 3,
-        borderRadius: '2rem',
+        borderRadius: '0.75rem',
+        paddingY: '0.5rem',
         fontWeight: 600,
         fontFamily: theme.typography.fontFamily,
         fontSize: '1.1rem',
@@ -41,7 +42,6 @@ export const FormikSubmitButton: React.FC<Props> = ({
       {...props}
     >
       {loading ? (
-        // Можно заменить на кастомный лоадер, если нужно
         <span>{label}...</span>
       ) : (
         label

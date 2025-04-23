@@ -32,5 +32,10 @@
                 "passwordRequired": "Required"
             }
         }
+    },
+    "features": {
+        "logo" : {
+            "name": "GrooveGuess"
+        }
     }
 }

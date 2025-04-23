@@ -36,7 +36,7 @@ export const FormikTextField: React.FC<Props> = ({
         borderRadius: '0.75rem',
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            borderColor: theme.palette.accent.main,
+            borderColor: theme.palette.primary.main,
           },
           '&:hover fieldset': {
             borderColor: theme.palette.primary.light,

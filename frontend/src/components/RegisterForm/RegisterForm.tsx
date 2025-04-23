@@ -41,15 +41,27 @@ export const RegisterForm = ({
       }}
     >
       <Card sx={{
-        maxWidth: 400,
-        width: '100%',
+        maxWidth: 500,
         borderRadius: '1.5rem',
-        boxShadow: '0 8px 32px 0 rgba(38, 166, 154, 0.10)',
+        boxShadow: '0 8px 24px rgba(76, 175, 80, 0.10)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         fontFamily: theme.typography.fontFamily,
         background: theme.palette.background.paper,
         border: `1.5px solid ${theme.palette.accent.light}`,
+        '&:hover': {
+            transform: 'translateY(-8px)',
+            boxShadow: '0 12px 32px rgba(76, 175, 80, 0.15)',
+          },
       }}>
-        <CardContent>
+        <CardContent  sx={{
+            padding: '3rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom:  "2rem",
+            gap: 2,
+            fontFamily: theme.typography.fontFamily,
+          }}>
           <Typography
             variant="h5"
             align="center"
@@ -82,10 +94,12 @@ export const RegisterForm = ({
                   autoComplete="username"
                   aria-label={t('username')}
                   aria-describedby="username-helper-text"
+                  autoFocus
                 />
                 <FormikTextField
                   name="email"
                   label={t('email')}
+                  type="email"
                   autoComplete="email"
                   aria-label={t('email')}
                   aria-describedby="email-helper-text"
