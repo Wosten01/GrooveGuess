@@ -2,10 +2,10 @@ import { Card, CardContent, Typography, Button, Divider, useTheme } from '@mui/m
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslation } from 'react-i18next';
-import './Home.css';
+import './WelcomePage.css';
 import { TranslationNamespace } from '../../i18n';
 
-export const Home = () => {
+export const WelcomePage = () => {
   const { t } = useTranslation(TranslationNamespace.Common, { keyPrefix: 'pages.home' }) 
   const theme = useTheme();
 

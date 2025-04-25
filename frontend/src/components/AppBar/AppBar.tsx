@@ -14,7 +14,7 @@ import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 const mockUser = {
-  isAuthenticated: true,
+  isAuthenticated: false,
   name: "Иван",
   avatarUrl: "",
 };
