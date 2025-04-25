@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 
 @Configuration
 @EnableWebSecurity
@@ -24,7 +25,7 @@ class SecurityBeansConfig(
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http
+            http
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
@@ -36,7 +37,6 @@ class SecurityBeansConfig(
                         "/v3/api-docs/**",
                         "/v3/api-docs.yaml"
                     ).permitAll()
-                    // Public endpoints (например, регистрация/логин)
                     .requestMatchers("/api/auth/**").permitAll()
                     .anyRequest().permitAll()
             }

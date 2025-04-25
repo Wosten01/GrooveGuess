@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec
 import java.util.Base64
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.Valid
 import io.jsonwebtoken.JwtException
 
 @RestController
@@ -56,7 +57,8 @@ class AuthController(
     }
 
     @PostMapping("/register")
-    fun register(request: RegisterDTO): ResponseEntity<Message> {
+    fun register(@Valid @RequestBody request: RegisterDTO): ResponseEntity<Message> {
+        println(request)
         if (request.email.isBlank() || !request.email.contains("@")) {
             return ResponseEntity.badRequest().body(Message("Invalid email format"))
         }
@@ -87,12 +89,12 @@ class AuthController(
             return ResponseEntity.status(401).body(Message("Unauthenticated"))
         }
         return try {
-            val issuer = jwtUtil.getIssuerFromToken(token)
-            if (issuer == null) {
+            val id = jwtUtil.getUserIdFromToken(token)
+            if (id == null) {
                 return ResponseEntity.status(401).body(Message("Invalid or expired token"))
             }
 
-            val user = this.userService.findById(issuer)
+            val user = this.userService.findById(id)
             if (user == null) {
                 ResponseEntity.status(404).body(Message("User not found"))
             }                

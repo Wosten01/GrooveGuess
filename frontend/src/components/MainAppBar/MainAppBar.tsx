@@ -12,28 +12,21 @@ import Tooltip from "@mui/material/Tooltip";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
-
-const mockUser = {
-  isAuthenticated: false,
-  name: "Иван",
-  avatarUrl: "",
-};
+import { useAuth } from "../../hooks/auth-context";
 
 export const MainAppBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = mockUser;
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const { logout, user } = useAuth()
 
   const isLogin = location.pathname === "/login";
   const isRegister = location.pathname === "/register";
 
-  // Пример обработчика выхода
   const handleLogout = () => {
-    // Здесь должна быть ваша логика выхода
-    // Например: auth.logout(); navigate('/login');
-    alert("Выход из аккаунта");
+     logout()
   };
 
   return (
@@ -57,7 +50,7 @@ export const MainAppBar: React.FC = () => {
             {t("features.logo.name")}
           </Typography>
         </Box>
-        {user.isAuthenticated ? (
+        {user ? (
           <Box
             sx={{
               display: "flex",
@@ -67,9 +60,9 @@ export const MainAppBar: React.FC = () => {
             }}
           >
             <Typography variant="body1" color="primary">
-              {user.name}
+              {user.username}
             </Typography>
-            <Avatar src={user.avatarUrl}>{user.name[0]}</Avatar>
+            <Avatar src={""}>{user.username[0]}</Avatar>
             <Tooltip title={t("features.logout.title")}>
               <IconButton
                 aria-label={t("features.logout.title")}

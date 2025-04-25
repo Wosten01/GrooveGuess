@@ -1,10 +1,27 @@
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../../api/auth-api";
 import { LoginForm, LoginFormValues } from "../../../components";
 import { theme } from "../../../theme";
+import { useAuth } from "../../../hooks/auth-context";
 
 export const LoginPage = () => {
+  const navigate = useNavigate()
+  const {fetchUser} = useAuth()
+
+
   const handleLogin = async (values: LoginFormValues) => {
-    alert(JSON.stringify(values, null, 2));
+    const response = await loginUser(values);
+    
+    console.debug(response)
+
+    if (response.status === 200) {
+      navigate("/");
+      fetchUser()
+    } else {
+      //  handle error 
+    }
   };
+
 
   return (
     <div

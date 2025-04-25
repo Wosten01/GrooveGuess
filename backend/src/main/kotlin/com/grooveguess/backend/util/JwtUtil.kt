@@ -19,6 +19,7 @@ class JwtUtil(
     
     fun generateToken(user: User): String {
         val claims = Jwts.claims().apply {
+            this["id"] = user.id
             this["role"] = user.role.name
             this["score"] = user.score
         }
@@ -38,16 +39,21 @@ class JwtUtil(
     fun getUserIdFromToken(token: String): Long? {
         return try {
             val claims = getClaims(token)
-            claims.subject.toLongOrNull()
+            when (val id = claims["id"]) {
+                is Long -> id
+                is Int -> id.toLong()
+                is String -> id.toLongOrNull()
+                else -> null
+            }
         } catch (ex: Exception) {
             null
         }
     }
 
-    fun getIssuerFromToken(token: String): Long? {
+    fun getIssuerFromToken(token: String): String? {
         return try {
             val claims = getClaims(token)
-            claims.issuer.toLong()
+            claims.issuer
         } catch (ex: Exception) {
             null
         }

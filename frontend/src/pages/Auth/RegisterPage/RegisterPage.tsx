@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../../api/auth-api";
 import {
   RegisterForm,
   RegisterFormValues,
@@ -5,8 +7,18 @@ import {
 import { theme } from "../../../theme";
 
 export const RegisterPage = () => {
+  const navigate = useNavigate()
+
   const handleRegister = async (values: RegisterFormValues) => {
-    alert(JSON.stringify(values, null, 2));
+    const response = await registerUser(values);
+    
+    console.debug(response)
+
+    if (response.status === 200) {
+      navigate("/login");
+    } else {
+      //  handle error 
+    }
   };
 
   return (
