@@ -1,6 +1,5 @@
-
 import React from "react";
-import AppBar from "@mui/material/AppBar";
+import MUIAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
@@ -13,24 +12,26 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/auth-context";
+import { NavButton } from "./NavButton";
+import TableChartIcon from "@mui/icons-material/TableChart";
 
-export const MainAppBar: React.FC = () => {
+export const AppBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const { logout, user } = useAuth()
+  const { logout, user } = useAuth();
 
   const isLogin = location.pathname === "/login";
   const isRegister = location.pathname === "/register";
 
   const handleLogout = () => {
-     logout()
+    logout();
   };
 
   return (
-    <AppBar
+    <MUIAppBar
       color="transparent"
       sx={{ background: theme.palette.background.paper }}
     >
@@ -59,10 +60,25 @@ export const MainAppBar: React.FC = () => {
               userSelect: "none",
             }}
           >
-            <Typography variant="body1" color="primary">
-              {user.username}
-            </Typography>
-            <Avatar src={""}>{user.username[0]}</Avatar>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <NavButton
+                allowedRoles={["ADMIN"]}
+                to="/admin/tracks/table"
+                label={t("pages.admin.tracks.table.adminPanelTracksTitle")}
+                icon={<TableChartIcon />}
+              />
+            </Box>
+
+            <Tooltip
+              title={
+                <Typography variant="body1" color="info">
+                  {user.username}
+                </Typography>
+              }
+            >
+              <Avatar src={""}>{user.username[0]}</Avatar>
+            </Tooltip>
+
             <Tooltip title={t("features.logout.title")}>
               <IconButton
                 aria-label={t("features.logout.title")}
@@ -114,6 +130,6 @@ export const MainAppBar: React.FC = () => {
           </Box>
         )}
       </Toolbar>
-    </AppBar>
+    </MUIAppBar>
   );
 };

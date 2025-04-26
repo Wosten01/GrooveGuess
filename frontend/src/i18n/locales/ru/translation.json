@@ -31,14 +31,60 @@
         "passwordMin": "Минимум 6 символов",
         "passwordRequired": "Обязательное поле"
       }
+    },
+    "admin": {
+      "tracks": {
+        "details": {
+          "adminPanelTitle": "Добавить трек",
+          "adminPanelEditTitle": "Редактировать трек",
+          "adminPanelDesc": "Добавляйте новые треки в систему через эту форму.",
+          "adminPanelEditDesc": "Измените данные трека и сохраните изменения.",
+          "trackTitle": "Название трека",
+          "trackArtist": "Исполнитель",
+          "trackUrl": "Ссылка на трек",
+          "fillAllFields": "Пожалуйста, заполните все поля.",
+          "invalidUrl": "Некорректная ссылка",
+          "addTrack": "Добавить трек",
+          "editTrack": "Сохранить изменения",
+          "trackAdded": "Трек успешно добавлен!",
+          "trackUpdated": "Трек успешно обновлён!",
+          "adminOnly": "Только администратор может добавлять или редактировать треки.",
+          "addError": "Ошибка при добавлении трека.",
+          "editError": "Ошибка при редактировании трека.",
+          "networkError": "Ошибка сети.",
+          "trackNotFound": "Трек не найден",
+          "fetchError": "Ошибка при получении трека.",
+          "noUserId": "Не удалось определить пользователя."
+        },
+        "table": {
+          "deleteTrack": "Удалить",
+          "deleteTrackTitle": "Удалить трек?",
+          "deleteTrackConfirm": "Вы уверены, что хотите удалить этот трек? Это действие необратимо.",
+          "cancel": "Отмена",
+          "delete": "Удалить",
+          "deleting": "Удаление...",
+          "deleteError": "Ошибка при удалении трека.",
+          "adminPanelTracksTitle": "Список треков",
+          "editTrack": "Редактировать",
+          "createTrack": "Добавить новый",
+          "actions": "Действия",
+          "noTracks": "Нет треков",
+          "fetchError": "Ошибка при получении треков.",
+          "refresh": "Обновить",
+          "trackTitle": "Название трека",
+          "trackArtist": "Исполнитель",
+          "trackUrl": "Трек",
+          "creatorId": "Создатель (creatorId)"
+        }
+      }
     }
   },
   "features": {
-        "logo" : {
-            "name": "GrooveGuess"
-        },
-        "logout": {
-            "title": "Выйти"
-        }
+    "logo": {
+      "name": "GrooveGuess"
+    },
+    "logout": {
+      "title": "Выйти"
     }
+  }
 }

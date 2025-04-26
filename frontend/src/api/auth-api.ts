@@ -36,7 +36,7 @@ export interface RegisterDTO {
   }
   
   export async function getCurrentUser(): Promise<ApiResponse<User>> {
-    return apiGet<User>(authPrefix + "/me", { withCredentials: true });
+    return apiGet<User>(authPrefix + "/me");
   }
 
   export async function logoutUser(): Promise<ApiResponse<{ message: string }>> {
