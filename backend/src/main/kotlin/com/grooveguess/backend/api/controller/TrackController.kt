@@ -98,16 +98,16 @@ class TrackController(
         }
     }
 
-    // @GetMapping("/validate-audio")
-    // fun validateAudioUrl(@RequestParam url: String): ResponseEntity<AudioVerificationResult> {
-    //     logger.debug("GET /api/tracks/validate-audio - Validating audio URL: $url")
-    //     val result = trackService.verifyAudioUrl(url)
-    //     return if (result.isValid) {
-    //         logger.debug("Audio URL is valid: $url, mimeType: ${result.mimeType}")
-    //         ResponseEntity.ok(result)
-    //     } else {
-    //         logger.debug("Audio URL is invalid: $url, error: ${result.error}")
-    //         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result)
-    //     }
-    // }
+    @GetMapping("/validate-audio")
+    fun validateAudioUrl(@RequestParam url: String): ResponseEntity<AudioVerificationResult> {
+        logger.debug("GET /api/tracks/validate-audio - Validating audio URL: $url")
+        val result = trackService.verifyAudioUrl(url)
+        return if (result.isValid) {
+            logger.debug("Audio URL is valid: $url, mimeType: ${result.mimeType}")
+            ResponseEntity.ok(result)
+        } else {
+            logger.debug("Audio URL is invalid: $url, error: ${result.error}")
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result)
+        }
+    }
 }

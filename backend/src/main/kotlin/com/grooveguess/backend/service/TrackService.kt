@@ -3,9 +3,14 @@ package com.grooveguess.backend.service
 
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.repository.TrackRepository
+import com.grooveguess.backend.domain.model.User
 import org.springframework.stereotype.Service
 import org.slf4j.LoggerFactory
 import java.net.URI
+import org.apache.hc.client5.http.classic.methods.HttpHead
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.core5.http.HttpStatus
 
 data class AudioVerificationResult(
     val isValid: Boolean,
@@ -30,12 +35,13 @@ class TrackService(
         "audio/webm"
     )
 
-    fun create(track: Track, creatorId: Long): Track {
-        logger.debug("Attempting to create track: $track by user $creatorId")
-        if (!userService.isAdmin(creatorId)) {
-            logger.debug("User $creatorId is not admin, cannot create track")
+    fun create(track: Track, userId: Long): Track {
+        logger.debug("Attempting to create track: $track by user $userId")
+        if (!userService.isAdmin(userId)) {
+            logger.debug("User $userId is not admin, cannot create track")
             throw IllegalAccessException("Only admins can create tracks")
         }
+        // creator logic removed
         val saved = trackRepository.save(track)
         logger.debug("Track created: $saved")
         return saved
@@ -59,21 +65,22 @@ class TrackService(
             throw IllegalAccessException("Only admins can update tracks")
         }
 
-        // val audioVerificationResult = verifyAudioUrl(updatedTrack.url)
-        // logger.debug("Audio from URL ${updatedTrack.url} is ${if (audioVerificationResult.isValid) "valid" else "invalid"}.")
+        val audioVerificationResult = verifyAudioUrl(updatedTrack.url)
+        logger.debug("Audio from URL ${updatedTrack.url} is ${if (audioVerificationResult.isValid) "valid" else "invalid"}.")
 
-        // if (audioVerificationResult.error != null || !audioVerificationResult.isValid) {
-        //     logger.debug("Audio verification failed: ${audioVerificationResult.error}")
-        //     throw RuntimeException(audioVerificationResult.error)
-        // }
+        if (audioVerificationResult.error != null || !audioVerificationResult.isValid) {
+            logger.debug("Audio verification failed: ${audioVerificationResult.error}")
+            throw RuntimeException(audioVerificationResult.error)
+        }
 
-        // logger.debug("mime type is ${audioVerificationResult.mimeType}.")
+        logger.debug("mime type is ${audioVerificationResult.mimeType}.")
+
 
         return trackRepository.findById(id).map {
             val newTrack = it.copy(
                 title = updatedTrack.title,
                 artist = updatedTrack.artist,
-                url = updatedTrack.url
+                url = updatedTrack.url,
             )
             val saved = trackRepository.save(newTrack)
             logger.debug("Track updated: $saved")
@@ -91,89 +98,64 @@ class TrackService(
         logger.debug("Track $id deleted")
     }
 
-    /*
-    // Пример расширенного удаления с удалением трека из всех Quiz, где он встречается
-    fun delete(id: Long, userId: Long) {
-        logger.debug("Attempting to delete track $id by user $userId")
-        if (!userService.isAdmin(userId)) {
-            logger.debug("User $userId is not admin, cannot delete track")
-            throw IllegalAccessException("Only admins can delete tracks")
-        }
+    fun verifyAudioUrl(url: String): AudioVerificationResult {
+        logger.debug("Verifying audio URL: $url")
+        return try {
+            val parsedUrl = try {
+                URI(url)
+            } catch (e: Exception) {
+                logger.error("Invalid URL format: $url", e)
+                return AudioVerificationResult(
+                    isValid = false,
+                    error = "Invalid URL format: ${e.message}"
+                )
+            }
 
-        // Удаляем трек из всех Quiz, где он встречается
-        val quizzesWithTrack = quizRepository.findAll().filter { quiz ->
-            quiz.tracks.any { track -> track.id == id }
-        }
-        for (quiz in quizzesWithTrack) {
-            val updatedTracks = quiz.tracks.filter { track -> track.id != id }
-            val updatedQuiz = quiz.copy(tracks = updatedTracks)
-            quizRepository.save(updatedQuiz)
-            logger.debug("Removed track $id from quiz ${quiz.id}")
-        }
+            // Шаг 1: Выполняем HEAD-запрос для проверки Content-Type
+            HttpClients.createDefault().use { client: CloseableHttpClient ->
+                val request = HttpHead(parsedUrl)
+                val response = client.execute(request, null) { response -> response }
 
-        trackRepository.deleteById(id)
-        logger.debug("Track $id deleted")
+                val statusCode = response.code
+                if (statusCode != HttpStatus.SC_OK) {
+                    logger.warn("HTTP error for URL $url: $statusCode")
+                    return AudioVerificationResult(
+                        isValid = false,
+                        error = "HTTP error: $statusCode"
+                    )
+                }
+
+                val contentType = response.getFirstHeader("Content-Type")?.value
+                if (contentType == null || !validAudioMimeTypes.any { contentType.contains(it) }) {
+                    logger.warn("Invalid or missing Content-Type for URL $url: $contentType")
+                    return AudioVerificationResult(
+                        isValid = false,
+                        error = "Invalid content type: ${contentType ?: "unknown"}. Expected an audio MIME type."
+                    )
+                }
+
+                // Шаг 2: Проверка Content-Length (опционально)
+                val contentLength = response.getFirstHeader("Content-Length")?.value?.toLongOrNull()
+                if (contentLength != null && contentLength <= 0) {
+                    logger.warn("Invalid content length for URL $url: $contentLength")
+                    return AudioVerificationResult(
+                        isValid = false,
+                        error = "Invalid content length: $contentLength"
+                    )
+                }
+
+                logger.debug("Audio URL $url is valid with content type $contentType")
+                AudioVerificationResult(
+                    isValid = true,
+                    mimeType = contentType
+                )
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to verify URL $url", e)
+            AudioVerificationResult(
+                isValid = false,
+                error = "Failed to verify URL: ${e.message}"
+            )
+        }
     }
-    */
-
-    // fun verifyAudioUrl(url: String): AudioVerificationResult {
-    //     logger.debug("Verifying audio URL: $url")
-    //     return try {
-    //         val parsedUrl = try {
-    //             URI(url)
-    //         } catch (e: Exception) {
-    //             logger.error("Invalid URL format: $url", e)
-    //             return AudioVerificationResult(
-    //                 isValid = false,
-    //                 error = "Invalid URL format: ${e.message}"
-    //             )
-    //         }
-
-    //         // Шаг 1: Выполняем HEAD-запрос для проверки Content-Type
-    //         HttpClients.createDefault().use { client: CloseableHttpClient ->
-    //             val request = HttpHead(parsedUrl)
-    //             val response = client.execute(request, null) { response -> response }
-
-    //             val statusCode = response.code
-    //             if (statusCode != HttpStatus.SC_OK) {
-    //                 logger.warn("HTTP error for URL $url: $statusCode")
-    //                 return AudioVerificationResult(
-    //                     isValid = false,
-    //                     error = "HTTP error: $statusCode"
-    //                 )
-    //             }
-
-    //             val contentType = response.getFirstHeader("Content-Type")?.value
-    //             if (contentType == null || !validAudioMimeTypes.any { contentType.contains(it) }) {
-    //                 logger.warn("Invalid or missing Content-Type for URL $url: $contentType")
-    //                 return AudioVerificationResult(
-    //                     isValid = false,
-    //                     error = "Invalid content type: ${contentType ?: "unknown"}. Expected an audio MIME type."
-    //                 )
-    //             }
-
-    //             // Шаг 2: Проверка Content-Length (опционально)
-    //             val contentLength = response.getFirstHeader("Content-Length")?.value?.toLongOrNull()
-    //             if (contentLength != null && contentLength <= 0) {
-    //                 logger.warn("Invalid content length for URL $url: $contentLength")
-    //                 return AudioVerificationResult(
-    //                     isValid = false,
-    //                     error = "Invalid content length: $contentLength"
-    //                 )
-    //             }
-
-    //             logger.debug("Audio URL $url is valid with content type $contentType")
-    //             AudioVerificationResult(
-    //                 isValid = true,
-    //                 mimeType = contentType
-    //             )
-    //         }
-    //     } catch (e: Exception) {
-    //         logger.error("Failed to verify URL $url", e)
-    //         AudioVerificationResult(
-    //             isValid = false,
-    //             error = "Failed to verify URL: ${e.message}"
-    //         )
-    //     }
-    // }
 }

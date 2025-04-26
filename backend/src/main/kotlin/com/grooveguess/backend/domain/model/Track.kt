@@ -1,12 +1,8 @@
 package com.grooveguess.backend.domain.model
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.ManyToMany
+import jakarta.persistence.*
 import com.grooveguess.backend.domain.model.Quiz
-import jakarta.persistence.Column
+import com.grooveguess.backend.domain.model.User
 
 @Entity
 data class Track(
@@ -25,5 +21,5 @@ data class Track(
     val url: String,
 
     @ManyToMany(mappedBy = "tracks")
-    val quizzes: List<Quiz> = emptyList()
+    val quizzes: List<Quiz> = emptyList(),
 )
