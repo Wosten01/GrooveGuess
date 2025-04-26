@@ -41,7 +41,6 @@ class TrackService(
             logger.debug("User $userId is not admin, cannot create track")
             throw IllegalAccessException("Only admins can create tracks")
         }
-        // creator logic removed
         val saved = trackRepository.save(track)
         logger.debug("Track created: $saved")
         return saved
