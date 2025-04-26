@@ -5,6 +5,7 @@ import com.grooveguess.backend.domain.model.Quiz
 import com.grooveguess.backend.domain.model.User
 
 @Entity
+@Table(name = "tracks")
 data class Track(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

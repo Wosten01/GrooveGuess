@@ -2,6 +2,7 @@
 package com.grooveguess.backend.api.controller
 
 import com.grooveguess.backend.domain.model.Track
+import com.grooveguess.backend.domain.dto.TrackRequest
 import com.grooveguess.backend.service.TrackService
 import com.grooveguess.backend.service.AudioVerificationResult
 import org.springframework.http.HttpStatus
@@ -19,11 +20,16 @@ class TrackController(
 
     @PostMapping
     fun createTrack(
-        @RequestBody track: Track,
+        @RequestBody request: TrackRequest,
         @RequestParam creatorId: Long
     ): ResponseEntity<Track> {
-        logger.debug("POST /api/tracks - Attempting to create track: $track by user $creatorId")
+        logger.debug("POST /api/tracks - Attempting to create track: $request by user $creatorId")
         return try {
+            val track = Track(
+                title = request.title,
+                artist = request.artist,
+                url = request.url
+            )
             val created = trackService.create(track, creatorId)
             logger.debug("Track created successfully: $created")
             ResponseEntity.status(HttpStatus.CREATED).body(created)
@@ -60,11 +66,16 @@ class TrackController(
     @PutMapping("/{id}")
     fun updateTrack(
         @PathVariable id: Long,
-        @RequestBody updatedTrack: Track,
+        @RequestBody request: TrackRequest,
         @RequestParam userId: Long
     ): ResponseEntity<Track> {
-        logger.debug("PUT /api/tracks/$id - Attempting to update track by user $userId with data: $updatedTrack")
+        logger.debug("PUT /api/tracks/$id - Attempting to update track by user $userId with data: $request")
         return try {
+            val updatedTrack =Track(
+                title = request.title,
+                artist = request.artist,
+                url = request.url
+            )
             val updated = trackService.update(id, updatedTrack, userId)
             if (updated != null) {
                 logger.debug("Track updated successfully: $updated")
