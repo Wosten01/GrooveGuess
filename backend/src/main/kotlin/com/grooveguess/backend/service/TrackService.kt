@@ -11,6 +11,8 @@ import org.apache.hc.client5.http.classic.methods.HttpHead
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.HttpStatus
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 
 data class AudioVerificationResult(
     val isValid: Boolean,
@@ -52,9 +54,10 @@ class TrackService(
             RuntimeException("Track not found")
         }
 
-    fun findAll(): List<Track> {
-        logger.debug("Fetching all tracks")
-        return trackRepository.findAll()
+
+
+    fun findAll(page: Int, size: Int): Page<Track> {
+        return trackRepository.findAll(PageRequest.of(page, size))
     }
 
     fun update(id: Long, updatedTrack: Track, userId: Long): Track? {

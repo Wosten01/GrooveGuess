@@ -39,6 +39,7 @@ class JwtUtil(
     fun getUserIdFromToken(token: String): Long? {
         return try {
             val claims = getClaims(token)
+            println(claims)
             when (val id = claims["id"]) {
                 is Long -> id
                 is Int -> id.toLong()

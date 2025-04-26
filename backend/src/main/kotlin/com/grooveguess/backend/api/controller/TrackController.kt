@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 
 @RestController
 @RequestMapping("/api/tracks")
@@ -56,13 +57,13 @@ class TrackController(
     }
 
     @GetMapping
-    fun getAllTracks(): List<Track> {
-        logger.debug("GET /api/tracks - Fetching all tracks")
-        val tracks = trackService.findAll()
-        logger.debug("Found ${tracks.size} tracks")
-        return tracks
+    fun getAllTracks(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): Page<Track> {
+        return trackService.findAll(page, size)
     }
-
+    
     @PutMapping("/{id}")
     fun updateTrack(
         @PathVariable id: Long,

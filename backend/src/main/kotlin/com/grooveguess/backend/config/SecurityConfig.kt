@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.http.HttpMethod
 
 @Configuration
 @EnableWebSecurity
@@ -38,15 +39,11 @@ class SecurityBeansConfig(
                         "/v3/api-docs.yaml"
                     ).permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/tracks/**").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/**").permitAll()
                     .anyRequest().permitAll()
             }
         return http.build()
     }
 
-    // @Bean
-    // fun authenticationManager(http: HttpSecurity, passwordEncoder: BCryptPasswordEncoder): AuthenticationManager {
-    //     val builder = http.getSharedObject(AuthenticationManagerBuilder::class.java)
-    //     builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder)
-    //     return builder.build()
-    // }
 }

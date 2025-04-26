@@ -22,6 +22,7 @@ type Props<T> = {
   emptyMessage?: ReactNode;
   maxHeight?: number | string;
   minWidth?: number | string;
+  pagination?: ReactNode;
 };
 
 export function Table<T>({
@@ -29,8 +30,8 @@ export function Table<T>({
   columns,
   actions,
   emptyMessage,
-  maxHeight = 500,
-  minWidth = 700, // по умолчанию минимальная ширина для скролла
+  minWidth = 700,
+  pagination,
 }: Props<T>) {
   return (
     <TableContainer
@@ -39,7 +40,6 @@ export function Table<T>({
         borderRadius: "1rem",
         boxShadow: "none",
         overflowX: "auto",
-        maxHeight,
         overflowY: "auto",
         width: "100%",
       }}
@@ -81,6 +81,7 @@ export function Table<T>({
           )}
         </TableBody>
       </MUITable>
+      {pagination && <div style={{ padding: "1rem" }}>{pagination}</div>}
     </TableContainer>
   );
 }

@@ -9,8 +9,13 @@ export type Track = {
 
 const authPrefix = "/tracks"
 
-export async function getTracks(): Promise<Track[]> {
-  const response: ApiResponse<Track[]> = await apiGet<Track[]>(authPrefix);
+
+type Pagination <T> ={
+   content: T[]; totalPages: number; totalElements: number; number: number; 
+}
+
+export async function getTracks(page = 0, size = 20): Promise<Pagination<Track>> {
+  const response = await apiGet<Pagination<Track>>(`/tracks?page=${page}&size=${size}`);
   return response.data;
 }
 

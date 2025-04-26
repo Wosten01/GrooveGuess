@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,15 +12,16 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 import { useTranslation } from "react-i18next";
 import { TranslationNamespace } from "../../../i18n";
 import { getTracks, Track, deleteTrack } from "../../../api/tracks-api";
-import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/auth-context";
 import { DialogConfirm } from "../../../components/Dialog/DialogConfirm";
 import { Table, TableActions } from "../../../components";
+import { PaginatedTable } from "../../../components/Table/PaginatedTable";
 
 type TableColumn<T> = {
   label: React.ReactNode;
@@ -36,35 +37,10 @@ export const AdminTrackTable = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [trackToDelete, setTrackToDelete] = useState<Track | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-
-  const fetchTracks = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getTracks();
-      setTracks(data);
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        setError(e.message || t("networkError"));
-      } else {
-        setError(t("networkError"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchTracks();
-  }, [fetchTracks]);
 
   const handleCreate = () => {
     navigate("/admin/tracks/details");
@@ -88,7 +64,6 @@ export const AdminTrackTable = () => {
       await deleteTrack(trackToDelete.id, user.id);
       setDeleteDialogOpen(false);
       setTrackToDelete(null);
-      fetchTracks();
     } catch (e: unknown) {
       if (e instanceof Error) {
         setDeleteError(e.message || t("deleteError"));
@@ -117,7 +92,6 @@ export const AdminTrackTable = () => {
             src={row.url}
             onPlay={() => {}}
             style={{
-              width: 400,
               background: theme.palette.background.paper,
             }}
             showJumpControls={false}
@@ -142,7 +116,7 @@ export const AdminTrackTable = () => {
     >
       <Card
         sx={{
-          maxWidth: 900,
+          maxWidth: 1200,
           width: "100%",
           borderRadius: "1.5rem",
           boxShadow: "0 8px 24px rgba(76, 175, 80, 0.10)",
@@ -160,40 +134,50 @@ export const AdminTrackTable = () => {
           >
             {t("adminPanelTracksTitle")}
           </Typography>
-          <TableActions
-            onCreate={handleCreate}
-            onRefresh={fetchTracks}
-            loading={loading}
-            createLabel={t("createTrack")}
-            refreshLabel={t("refresh")}
-          />
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error">{error}</Alert>
-          ) : (
-            <Table
-              rows={tracks}
-              columns={columns}
-              actions={(track) => (
-                <>
-                  <Tooltip title={t("editTrack")}>
-                    <IconButton onClick={() => handleEdit(track)}>
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t("deleteTrack")}>
-                    <IconButton color="error" onClick={() => handleDeleteClick(track)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              )}
-              emptyMessage={t("noTracks")}
-            />
-          )}
+          <PaginatedTable<Track>
+            fetchData={getTracks}
+            defaultRowsPerPage={10}
+          >
+            {({ data, loading, error, pagination, refresh }) => (
+              <>
+                <TableActions
+                  onCreate={handleCreate}
+                  onRefresh={refresh}
+                  loading={loading}
+                  createLabel={t("createTrack")}
+                  refreshLabel={t("refresh")}
+                />
+                {loading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
+                    <CircularProgress />
+                  </Box>
+                ) : error ? (
+                  <Alert severity="error">{error}</Alert>
+                ) : (
+                  <Table
+                    rows={data}
+                    columns={columns}
+                    actions={(track) => (
+                      <>
+                        <Tooltip title={t("editTrack")}>
+                          <IconButton onClick={() => handleEdit(track)}>
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("deleteTrack")}>
+                          <IconButton color="error" onClick={() => handleDeleteClick(track)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                    emptyMessage={t("noTracks")}
+                    pagination={pagination}
+                  />
+                )}
+              </>
+            )}
+          </PaginatedTable>
         </CardContent>
       </Card>
       <DialogConfirm

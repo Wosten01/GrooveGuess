@@ -65,7 +65,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
       setLoadingTrack(true);
       getTracks()
         .then((tracks) => {
-          const track = tracks.find((t) => String(t.id) === String(trackId));
+          const track = tracks.content.find((t) => String(t.id) === String(trackId));
           if (track) {
             setInitialValues({
               title: track.title,
