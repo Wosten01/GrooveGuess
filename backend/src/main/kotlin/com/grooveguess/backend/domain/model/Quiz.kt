@@ -1,6 +1,8 @@
+
 package com.grooveguess.backend.domain.model
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "quizzes")
@@ -19,5 +21,12 @@ data class Quiz(
         joinColumns = [JoinColumn(name = "quiz_id")],
         inverseJoinColumns = [JoinColumn(name = "track_id")]
     )
-    val tracks: List<Track> = emptyList()
+    val tracks: List<Track> = emptyList(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    val creator: User,
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )

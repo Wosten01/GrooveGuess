@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, ReactNode } from "react";
 import TablePagination from "@mui/material/TablePagination";
+import { AxiosError } from "axios";
 
 type PaginatedProps<T> = {
   fetchData: (page: number, size: number) => Promise<{
@@ -44,8 +45,12 @@ export function PaginatedTable<T>({
       const result = await fetchData(page, rowsPerPage);
       setData(result.content);
       setTotalElements(result.totalElements);
-    } catch (e: any) {
-      setError(e.message || "Ошибка загрузки");
+    } catch (e: unknown) {
+      if (e instanceof AxiosError) {
+        setError(e.message);
+      } else {
+        setError("Unknown error");
+      }
     } finally {
       setLoading(false);
     }

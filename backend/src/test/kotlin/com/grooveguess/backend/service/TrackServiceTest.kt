@@ -9,6 +9,8 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.mockito.kotlin.mock
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.PageImpl
 import java.util.*
 
 class TrackServiceTest {
@@ -57,11 +59,17 @@ class TrackServiceTest {
     }
 
     @Test
-    fun `findAll returns all tracks`() {
-        given(trackRepository.findAll()).willReturn(listOf(sampleTrack))
-        val result = service.findAll()
-        assertEquals(1, result.size)
-        assertEquals(sampleTrack, result[0])
+    fun `findAll returns all tracks with pagination`() {
+        val page = 0
+        val size = 10
+        val pageable = PageRequest.of(page, size)
+        val pageResult = PageImpl(listOf(sampleTrack), pageable, 1)
+
+        given(trackRepository.findAll(pageable)).willReturn(pageResult)
+
+        val result = service.findAll(page, size)
+        assertEquals(1, result.content.size)
+        assertEquals(sampleTrack, result.content[0])
     }
 
     @Test
