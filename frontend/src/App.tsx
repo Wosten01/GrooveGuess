@@ -14,6 +14,7 @@ import { AppBar } from "./components";
 import { AuthProvider } from "./context/AuthContext";
 import { Toolbar } from "@mui/material";
 import { Scoreboard } from "./pages/Scoreboard";
+import { QuizFeed } from "./pages"; 
 
 function App() {
   return (
@@ -27,6 +28,12 @@ function App() {
             <Route>
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
+            </Route>
+
+            <Route path="quizzes">
+              <Route index element={<QuizFeed />} /> 
+              <Route path="details" element={<QuizPanel />} />
+              <Route path="table" element={<QuizTable />} />
             </Route>
 
             <Route path="admin">

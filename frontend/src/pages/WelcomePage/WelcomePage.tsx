@@ -4,10 +4,16 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslation } from 'react-i18next';
 import './WelcomePage.css';
 import { TranslationNamespace } from '../../i18n';
+import { useNavigate } from 'react-router-dom';
 
 export const WelcomePage = () => {
   const { t } = useTranslation(TranslationNamespace.Common, { keyPrefix: 'pages.home' }) 
   const theme = useTheme();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/quizzes")
+  }
 
   return (
     <div
@@ -85,7 +91,7 @@ export const WelcomePage = () => {
               maxWidth: 360,
             }}
           >
-            {t('description') || 'Discover the joy of music with us!'}
+            {t('description')}
           </Typography>
           <Divider sx={{ width: 80, borderColor: theme.palette.accent.main }} />
           <Button
@@ -103,6 +109,7 @@ export const WelcomePage = () => {
                 transform: 'scale(1.05)',
               },
             }}
+            onClick={()=> handleClick()}
           >
             {t('start')}
           </Button>

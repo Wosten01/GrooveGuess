@@ -141,6 +141,11 @@
       "email": "Email",
       "score": "Счёт",
       "noUsers": "Нет пользователей"
+    },
+    "quizFeed": {
+      "quizFeedTitle": "Доступные викторины",
+      "noQuizzes": "Нет доступных викторин",
+      "creator": "Автор"
     }
   },
   "features": {

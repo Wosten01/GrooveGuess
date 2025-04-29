@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -298,6 +297,8 @@ export const QuizPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                     variant="outlined"
                     error={touched.description && Boolean(errors.description)}
                     helperText={touched.description && errors.description}
+                    multiline
+                    minRows={4} 
                   />
                   <TextField
                     name="roundCount"
