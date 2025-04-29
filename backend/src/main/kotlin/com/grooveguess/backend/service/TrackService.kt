@@ -57,12 +57,9 @@ class TrackService(
             RuntimeException("Track not found")
         }
 
-
-
         fun findAll(page: Int, size: Int, search: String? = null): Page<TrackDto> {
             val pageable = PageRequest.of(page, size)
             val trimmedSearch = search?.trim()
-            logger.debug(search)
             logger.debug("Searching tracks with term: '$trimmedSearch'")
         
             val trackPage: Page<Track> = if (!trimmedSearch.isNullOrEmpty()) {
@@ -70,8 +67,8 @@ class TrackService(
                     trimmedSearch, trimmedSearch, pageable
                 )
             } else {
-                 logger.debug("jopa")
-            trackRepository.findAll(pageable)
+                logger.debug("Fetching all tracks without search filter")
+                trackRepository.findAll(pageable)
             }
         
             logger.debug("Found ${trackPage.totalElements} tracks: ${trackPage.content.map { it.title }}")
@@ -85,6 +82,7 @@ class TrackService(
             }
             return PageImpl(trackDtos, pageable, trackPage.totalElements)
         }
+        
 
     fun update(id: Long, updatedTrack: Track, userId: Long): Track? {
         logger.debug("Attempting to update track $id by user $userId")

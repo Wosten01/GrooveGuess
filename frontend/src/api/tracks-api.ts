@@ -10,7 +10,7 @@ export type Track = {
 const authPrefix = "/tracks"
 
 
-type Pagination <T> ={
+export type Pagination <T> ={
    content: T[]; totalPages: number; totalElements: number; number: number; 
 }
 

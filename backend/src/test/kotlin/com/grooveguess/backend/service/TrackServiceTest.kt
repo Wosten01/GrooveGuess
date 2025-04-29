@@ -6,9 +6,11 @@ import com.grooveguess.backend.domain.repository.TrackRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.PageImpl
 import java.util.*
@@ -16,6 +18,7 @@ import java.util.*
 class TrackServiceTest {
 
     private val trackRepository: TrackRepository = mock()
+    private val trackService: TrackService = mock()
     private val userService: UserService = mock()
     private val service = TrackService(trackRepository, userService)
 
@@ -25,6 +28,7 @@ class TrackServiceTest {
         artist = "Test Artist",
         url = "http://test.com/audio.mp3"
     )
+
 
     @Test
     fun `create saves track if user is admin`() {
@@ -58,18 +62,19 @@ class TrackServiceTest {
         }
     }
 
+   
     @Test
     fun `findAll returns all tracks with pagination`() {
-        val page = 0
-        val size = 10
-        val pageable = PageRequest.of(page, size)
-        val pageResult = PageImpl(listOf(sampleTrack), pageable, 1)
+        val pageable = PageRequest.of(0, 2)
+        val track1 = Track(id = 1, title = "A", artist = "B", url = "url1")
+        val track2 = Track(id = 2, title = "C", artist = "D", url = "url2")
+        whenever(trackRepository.findAll(pageable)).thenReturn(PageImpl(listOf(track1, track2), pageable, 2))
 
-        given(trackRepository.findAll(pageable)).willReturn(pageResult)
+        val result = service.findAll(0, 2)
 
-        val result = service.findAll(page, size)
-        assertEquals(1, result.content.size)
-        assertEquals(sampleTrack, result.content[0])
+        assertEquals(2, result.content.size)
+        assertEquals(track1.title, result.content[0].title)
+        assertEquals(track2.title, result.content[1].title)
     }
 
     @Test

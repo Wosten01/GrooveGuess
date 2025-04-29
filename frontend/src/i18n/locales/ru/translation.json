@@ -132,6 +132,15 @@
           "selectedTracks": "Выбранные треки"
         }
       }
+    },
+    "scoreboard": {
+      "scoreboardTitle": "Таблица лидеров",
+      "searchUser": "Поиск по имени или email",
+      "place": "Место",
+      "username": "Имя пользователя",
+      "email": "Email",
+      "score": "Счёт",
+      "noUsers": "Нет пользователей"
     }
   },
   "features": {
