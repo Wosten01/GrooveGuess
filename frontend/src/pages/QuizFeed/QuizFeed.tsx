@@ -7,12 +7,14 @@ import {
   Grid,
   CircularProgress,
   Fade,
+
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { getQuizzes } from "../../api/quiz-api";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { TranslationNamespace } from "../../i18n";
+import { useNavigate } from "react-router-dom";
 
 interface Quiz {
   id: number;
@@ -31,6 +33,11 @@ export const QuizCard: React.FC<{ quiz: Quiz; index: number }> = ({
 }) => {
   const theme = useTheme();
   const { t } = useTranslation(TranslationNamespace.Common);
+  const navigate = useNavigate();
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/quizzes/play/${quiz.id}`);
+  };
 
   return (
     <motion.div
@@ -47,6 +54,7 @@ export const QuizCard: React.FC<{ quiz: Quiz; index: number }> = ({
         boxShadow: "0 12px 32px rgba(76, 175, 80, 0.18)",
       }}
       style={{ height: "100%" }}
+      onClick={handlePlayClick}
     >
       <Card
         sx={{
@@ -58,6 +66,9 @@ export const QuizCard: React.FC<{ quiz: Quiz; index: number }> = ({
           transition: "box-shadow 0.3s",
           background: theme.palette.secondary.contrastText,
           border: `1.5px solid ${theme.palette.primary.main}`,
+          cursor: "pointer",
+          position: "relative",
+          overflow: "visible",
         }}
       >
         <CardContent sx={{ flexGrow: 1 }}>

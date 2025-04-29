@@ -146,6 +146,12 @@
       "quizFeedTitle": "Доступные викторины",
       "noQuizzes": "Нет доступных викторин",
       "creator": "Автор"
+    },
+    "quizGame": {
+      "finished": "Игра окончена!",
+      "yourScore": "Ваш счёт",
+      "score": "Счёт",
+      "round": "Раунд"
     }
   },
   "features": {

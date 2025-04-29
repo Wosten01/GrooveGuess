@@ -9,6 +9,7 @@ import {
   TrackTable,
   QuizPanel,
   QuizTable,
+  QuizGameWrapper,
 } from "./pages";
 import { AppBar } from "./components";
 import { AuthProvider } from "./context/AuthContext";
@@ -31,9 +32,10 @@ function App() {
             </Route>
 
             <Route path="quizzes">
-              <Route index element={<QuizFeed />} /> 
+              <Route index element={<QuizFeed />} />
               <Route path="details" element={<QuizPanel />} />
               <Route path="table" element={<QuizTable />} />
+              <Route path="play/:quizId" element={<QuizGameWrapper />} />
             </Route>
 
             <Route path="admin">
