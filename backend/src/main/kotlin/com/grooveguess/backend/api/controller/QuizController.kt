@@ -6,6 +6,7 @@ import com.grooveguess.backend.service.QuizService
 import com.grooveguess.backend.domain.dto.AnswerResponse
 import com.grooveguess.backend.domain.dto.QuizResponse
 import com.grooveguess.backend.domain.dto.QuizRequest
+import com.grooveguess.backend.domain.dto.QuizDto
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 import org.springframework.data.domain.Page
@@ -21,10 +22,9 @@ class QuizController(private val quizService: QuizService) {
     fun QuizResponse(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int
-    ): Page<QuizResponse> {
+    ): Page<QuizDto> {
         logger.debug("Fetching all quizzes with page=$page, size=$size")
-        val quizPage = quizService.findAll(page, size)
-        return quizPage.map { QuizResponse.fromEntity(it) }
+        return quizService.findAll(page, size)
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package com.grooveguess.backend.api.controller
 
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.dto.TrackRequest
+import com.grooveguess.backend.domain.dto.TrackDto
 import com.grooveguess.backend.service.TrackService
 import com.grooveguess.backend.service.AudioVerificationResult
 import org.springframework.http.HttpStatus
@@ -59,9 +60,10 @@ class TrackController(
     @GetMapping
     fun getAllTracks(
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int
-    ): Page<Track> {
-        return trackService.findAll(page, size)
+        @RequestParam(defaultValue = "20") size: Int,
+        @RequestParam(defaultValue = "") search: String,
+    ): Page<TrackDto> {
+        return trackService.findAll(page, size, search)
     }
     
     @PutMapping("/{id}")

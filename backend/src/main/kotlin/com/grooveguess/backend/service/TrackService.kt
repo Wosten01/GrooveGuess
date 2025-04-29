@@ -4,6 +4,7 @@ package com.grooveguess.backend.service
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.repository.TrackRepository
 import com.grooveguess.backend.domain.model.User
+import com.grooveguess.backend.domain.dto.TrackDto
 import org.springframework.stereotype.Service
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -13,6 +14,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.HttpStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.PageImpl
+import org.springframework.transaction.annotation.Transactional
 
 data class AudioVerificationResult(
     val isValid: Boolean,
@@ -56,9 +59,32 @@ class TrackService(
 
 
 
-    fun findAll(page: Int, size: Int): Page<Track> {
-        return trackRepository.findAll(PageRequest.of(page, size))
-    }
+        fun findAll(page: Int, size: Int, search: String? = null): Page<TrackDto> {
+            val pageable = PageRequest.of(page, size)
+            val trimmedSearch = search?.trim()
+            logger.debug(search)
+            logger.debug("Searching tracks with term: '$trimmedSearch'")
+        
+            val trackPage: Page<Track> = if (!trimmedSearch.isNullOrEmpty()) {
+                trackRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(
+                    trimmedSearch, trimmedSearch, pageable
+                )
+            } else {
+                 logger.debug("jopa")
+            trackRepository.findAll(pageable)
+            }
+        
+            logger.debug("Found ${trackPage.totalElements} tracks: ${trackPage.content.map { it.title }}")
+            val trackDtos = trackPage.content.map { track ->
+                TrackDto(
+                    id = track.id,
+                    title = track.title,
+                    artist = track.artist,
+                    url = track.url
+                )
+            }
+            return PageImpl(trackDtos, pageable, trackPage.totalElements)
+        }
 
     fun update(id: Long, updatedTrack: Track, userId: Long): Track? {
         logger.debug("Attempting to update track $id by user $userId")

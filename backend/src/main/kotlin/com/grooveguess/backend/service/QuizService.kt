@@ -9,13 +9,17 @@ import com.grooveguess.backend.domain.repository.QuizRepository
 import com.grooveguess.backend.domain.repository.UserRepository
 import com.grooveguess.backend.domain.dto.AnswerResponse
 import com.grooveguess.backend.domain.dto.QuizRequest
-import com.grooveguess.backend.service.UserService
+import com.grooveguess.backend.domain.dto.QuizDto
+import com.grooveguess.backend.domain.dto.UserDto
+import com.grooveguess.backend.domain.dto.TrackDto
 import org.springframework.stereotype.Service
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import com.grooveguess.backend.domain.enum.AnswerStatus
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import com.grooveguess.backend.domain.enum.Role
 
 @Service
 class QuizService(
@@ -55,10 +59,35 @@ class QuizService(
             .orElseThrow { RuntimeException("Quiz not found") }
     }
 
-    fun findAll(page: Int, size: Int): Page<Quiz> {
-        logger.debug("Fetching all quizzes")
+    fun findAll(page: Int, size: Int): Page<QuizDto> {
         val pageable = PageRequest.of(page, size)
-        return quizRepository.findAll(pageable)
+        val quizPage = quizRepository.findAll(pageable)
+
+        val quizDtos = quizPage.content.map { quiz ->
+            val creator = quiz.creator
+            val tracks = quiz.tracks
+            QuizDto(
+                id = quiz.id,
+                title = quiz.title,
+                description = quiz.description,
+                roundCount = quiz.roundCount,
+                creator = UserDto(
+                    id = creator.id,
+                    username = creator.username,
+                    email = creator.email,
+                    role=  creator.role,
+                ),
+                tracks = tracks.map { track ->
+                    TrackDto(
+                        id = track.id,
+                        title = track.title,
+                        artist = track.artist,
+                        url = track.url,
+                    )
+                }
+            )
+        }
+        return PageImpl(quizDtos, pageable, quizPage.totalElements)
     }
 
     fun update(id: Long, updatedQuiz: Quiz, userId: Long): Quiz? {
@@ -93,7 +122,6 @@ class QuizService(
         }
         return tracks
     }
-    
 
     fun delete(id: Long, userId: Long) {
         logger.debug("Attempting to delete quiz id=$id by userId=$userId")

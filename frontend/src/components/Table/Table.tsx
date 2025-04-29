@@ -26,7 +26,7 @@ type Props<T> = {
 };
 
 export function Table<T>({
-  rows,
+  rows = [],
   columns,
   actions,
   emptyMessage,

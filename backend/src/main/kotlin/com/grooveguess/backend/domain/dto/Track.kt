@@ -5,3 +5,10 @@ data class TrackRequest(
     val artist: String,
     val url: String
 )
+
+data class TrackDto(
+    val id: Long,
+    val title: String,
+    val artist: String,
+    val url: String,
+)

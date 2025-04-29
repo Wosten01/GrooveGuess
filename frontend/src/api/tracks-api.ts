@@ -14,8 +14,12 @@ type Pagination <T> ={
    content: T[]; totalPages: number; totalElements: number; number: number; 
 }
 
-export async function getTracks(page = 0, size = 20): Promise<Pagination<Track>> {
-  const response = await apiGet<Pagination<Track>>(`/tracks?page=${page}&size=${size}`);
+export async function getTracks(page = 0, size = 20, search?: string): Promise<Pagination<Track>> {
+  let url = `/tracks?page=${page}&size=${size}`;
+  if (search && search.length > 0) {
+    url += `&search=${encodeURIComponent(search)}`;
+  }
+  const response = await apiGet<Pagination<Track>>(url);
   return response.data;
 }
 

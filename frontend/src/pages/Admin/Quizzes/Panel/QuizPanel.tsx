@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -12,35 +13,36 @@ import {
   Box,
   IconButton,
 } from "@mui/material";
-import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
+import QuizIcon from "@mui/icons-material/Quiz";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTranslation } from "react-i18next";
-import { TranslationNamespace } from "../../../i18n";
+import { TranslationNamespace } from "../../../../i18n";
 import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { useAuth } from "../../../hooks/auth-context";
+import { useAuth } from "../../../../hooks/auth-context";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  createTrack,
-  getTracks,
-  Track,
-  updateTrack,
-} from "../../../api/tracks-api";
-import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
-import { ApiResponse } from "../../../api";
+  createQuiz,
+  getQuizzes,
+  Quiz,
+  updateQuiz,
+} from "./../../../../api/quiz-api";
+import { ApiResponse } from "../../../../api";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Track } from "../../../../api/tracks-api";
+import { TrackSelector } from "./TrackSelector";
 
-type TrackFormValues = {
+type QuizFormValues = {
   title: string;
-  artist: string;
-  url: string;
+  description: string;
+  roundCount: number;
+  tracks: Track[];
 };
 
-export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const QuizPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { t } = useTranslation(TranslationNamespace.Common, {
-    keyPrefix: "pages.admin.tracks.details",
+    keyPrefix: "pages.admin.quizzes.details",
   });
   const theme = useTheme();
   const { user } = useAuth();
@@ -49,47 +51,54 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
 
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [initialValues, setInitialValues] = useState<TrackFormValues>({
+  const [initialValues, setInitialValues] = useState<QuizFormValues>({
     title: "",
-    artist: "",
-    url: "",
+    description: "",
+    roundCount: 2,
+    tracks: [],
   });
-  const [loadingTrack, setLoadingTrack] = useState(false);
+  const [loadingQuiz, setLoadingQuiz] = useState(false);
 
   const searchParams = new URLSearchParams(location.search);
-  const trackId = searchParams.get("id");
-  const isEdit = Boolean(trackId);
+  const quizId = Number(searchParams.get("id"));
+  const isEdit = Boolean(quizId);
 
   useEffect(() => {
-    if (isEdit && trackId) {
-      setLoadingTrack(true);
-      getTracks()
-        .then((tracks) => {
-          const track = tracks.content.find((t) => String(t.id) === String(trackId));
-          if (track) {
+    if (isEdit && quizId) {
+      setLoadingQuiz(true);
+      getQuizzes()
+        .then((quizzes) => {
+          const quiz = quizzes.content.find(
+            (q) => String(q.id) === String(quizId)
+          );
+          if (quiz) {
             setInitialValues({
-              title: track.title,
-              artist: track.artist,
-              url: track.url,
+              title: quiz.title,
+              description: quiz.description || "",
+              roundCount: quiz.roundCount || 1,
+              tracks: quiz.tracks ?? [],
             });
           } else {
-            setError(t("trackNotFound"));
+            setError(t("quizNotFound"));
           }
         })
         .catch(() => setError(t("fetchError")))
-        .finally(() => setLoadingTrack(false));
+        .finally(() => setLoadingQuiz(false));
     }
-  }, [isEdit, t, trackId]);
+  }, [isEdit, t, quizId]);
 
   const validationSchema = Yup.object({
     title: Yup.string().required(t("fillAllFields")),
-    artist: Yup.string().required(t("fillAllFields")),
-    url: Yup.string().url(t("invalidUrl")).required(t("fillAllFields")),
+    description: Yup.string().required(t("fillAllFields")),
+    roundCount: Yup.number()
+      .min(1, t("invalidRoundCount"))
+      .required(t("fillAllFields")),
+    tracks: Yup.array().min(1, t("fillAllFields")),
   });
 
   const handleSubmit = async (
-    values: TrackFormValues,
-    actions: FormikHelpers<TrackFormValues>
+    values: QuizFormValues,
+    actions: FormikHelpers<QuizFormValues>
   ) => {
     setSuccess(null);
     setError(null);
@@ -100,32 +109,35 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
       return;
     }
 
-    let response: ApiResponse<Track>;
+    let response: ApiResponse<Quiz>;
 
     try {
-      if (isEdit && trackId) {
-        response = await updateTrack(
-          trackId,
+      const trackIds = values.tracks.map((track) => Number(track.id));
+      if (isEdit && quizId) {
+        response = await updateQuiz(
+          quizId,
           {
             title: values.title,
-            artist: values.artist,
-            url: values.url,
+            description: values.description,
+            roundCount: values.roundCount,
+            trackIds,
           },
           user.id
         );
       } else {
-        response = await createTrack(
+        response = await createQuiz(
           {
             title: values.title,
-            artist: values.artist,
-            url: values.url,
+            description: values.description,
+            roundCount: values.roundCount,
+            trackIds,
           },
           user.id
         );
       }
 
       if (response && response.status < 300) {
-        setSuccess(isEdit ? t("trackUpdated") : t("trackAdded"));
+        setSuccess(isEdit ? t("quizUpdated") : t("quizAdded"));
         if (onSuccess) onSuccess();
       } else if (response.status === 403) {
         setError(t("adminOnly"));
@@ -169,7 +181,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
           sx={{ width: "100%", display: "flex", alignItems: "center", m: 2 }}
         >
           <IconButton
-            onClick={() => navigate("/admin/tracks/table")}
+            onClick={() => navigate("/admin/quizzes/table")}
             sx={{ mr: 1 }}
           >
             <ArrowBackIcon />
@@ -199,7 +211,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
             }}
             className="icon-container"
           >
-            <LibraryMusicIcon
+            <QuizIcon
               sx={{
                 fontSize: { xs: 36, sm: 44, md: 50, lg: 60 },
                 color: theme.palette.primary.main,
@@ -214,7 +226,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
               marginBottom: "0.5rem",
             }}
           >
-            {isEdit ? t("adminPanelEditTitle") : t("adminPanelTitle")}
+            {isEdit ? t("adminPanelEditQuizTitle") : t("adminPanelQuizTitle")}
           </Typography>
           <Typography
             variant="body1"
@@ -225,7 +237,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
               marginBottom: "1rem",
             }}
           >
-            {isEdit ? t("adminPanelEditDesc") : t("adminPanelDesc")}
+            {isEdit ? t("adminPanelEditQuizDesc") : t("adminPanelQuizDesc")}
           </Typography>
           <Divider
             sx={{
@@ -234,7 +246,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
               marginBottom: "1.5rem",
             }}
           />
-          {loadingTrack && isEdit ? (
+          {loadingQuiz && isEdit ? (
             <CircularProgress />
           ) : (
             <Formik
@@ -250,6 +262,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                 handleChange,
                 handleBlur,
                 values,
+                setFieldValue,
               }) => (
                 <Form
                   style={{
@@ -263,7 +276,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                 >
                   <TextField
                     name="title"
-                    label={t("trackTitle")}
+                    label={t("quizTitle")}
                     value={values.title}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -275,44 +288,37 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                     helperText={touched.title && errors.title}
                   />
                   <TextField
-                    name="artist"
-                    label={t("trackArtist")}
-                    value={values.artist}
+                    name="description"
+                    label={t("quizDescription")}
+                    value={values.description}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     fullWidth
                     required
                     variant="outlined"
-                    error={touched.artist && Boolean(errors.artist)}
-                    helperText={touched.artist && errors.artist}
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={touched.description && errors.description}
                   />
                   <TextField
-                    name="url"
-                    label={t("trackUrl")}
-                    value={values.url}
+                    name="roundCount"
+                    label={t("quizRoundCount")}
+                    value={values.roundCount}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     fullWidth
                     required
                     variant="outlined"
-                    type="url"
-                    error={touched.url && Boolean(errors.url)}
-                    helperText={touched.url && errors.url}
+                    type="number"
+                    inputProps={{ min: 1 }}
+                    error={touched.roundCount && Boolean(errors.roundCount)}
+                    helperText={touched.roundCount && errors.roundCount}
                   />
-                  {values.url && (
-                    <>
-                      <Typography>{"Проверьте свой трек"}</Typography>
-                      <AudioPlayer
-                        src={values.url}
-                        onPlay={() => console.log("Playing")}
-                        showJumpControls={false}
-                        customAdditionalControls={[]}
-                        style={{
-                          background: theme.palette.background.paper,
-                        }}
-                      />
-                    </>
-                  )}
+
+                  <TrackSelector
+                    selectedTracks={values.tracks}
+                    onChange={(tracks) => setFieldValue("tracks", tracks)}
+                  />
+
                   <Button
                     type="submit"
                     variant="contained"
@@ -340,7 +346,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                     }}
                     disabled={isSubmitting}
                   >
-                    {isEdit ? t("editTrack") : t("addTrack")}
+                    {isEdit ? t("editQuiz") : t("addQuiz")}
                   </Button>
                 </Form>
               )}

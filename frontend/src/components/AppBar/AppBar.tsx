@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/auth-context";
 import { NavButton } from "./NavButton";
 import TableChartIcon from "@mui/icons-material/TableChart";
+import QuizIcon from '@mui/icons-material/Quiz';
 
 export const AppBar: React.FC = () => {
   const navigate = useNavigate();
@@ -60,15 +61,21 @@ export const AppBar: React.FC = () => {
               userSelect: "none",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <NavButton
+                allowedRoles={["ADMIN"]}
+                to="/admin/quizzes/table"
+                label={t("pages.admin.quizzes.table.adminPanelQuizzesTitle")}
+                icon={<QuizIcon />}
+              />
+               <NavButton
                 allowedRoles={["ADMIN"]}
                 to="/admin/tracks/table"
                 label={t("pages.admin.tracks.table.adminPanelTracksTitle")}
                 icon={<TableChartIcon />}
               />
             </Box>
-
+            
             <Tooltip
               title={
                 <Typography variant="body1" color="info">

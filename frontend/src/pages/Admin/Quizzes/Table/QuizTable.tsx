@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Card,
@@ -12,16 +13,13 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
 import { useTranslation } from "react-i18next";
-import { TranslationNamespace } from "../../../i18n";
-import { getTracks, Track, deleteTrack } from "../../../api/tracks-api";
+import { TranslationNamespace } from "../../../../i18n";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../hooks/auth-context";
-import { DialogConfirm } from "../../../components/Dialog/DialogConfirm";
-import { Table, TableActions } from "../../../components";
-import { PaginatedTable } from "../../../components/Table/PaginatedTable";
+import { useAuth } from "../../../../hooks/auth-context";
+import { deleteQuiz, getQuizzes, Quiz } from "../../../../api/quiz-api";
+import { DialogConfirm, PaginatedTable, Table, TableActions } from "../../../../components";
+import { QuizTracksCell } from "./QuizTracksCell";
 
 type TableColumn<T> = {
   label: React.ReactNode;
@@ -29,41 +27,43 @@ type TableColumn<T> = {
   align?: "left" | "center" | "right";
 };
 
-export const AdminTrackTable = () => {
+export const QuizTable = () => {
   const { t } = useTranslation(TranslationNamespace.Common, {
-    keyPrefix: "pages.admin.tracks.table",
+    keyPrefix: "pages.admin.quizzes.table",
   });
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [trackToDelete, setTrackToDelete] = useState<Track | null>(null);
+  const [quizToDelete, setQuizToDelete] = useState<Quiz | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const handleCreate = () => {
-    navigate("/admin/tracks/details");
+    navigate("/admin/quizzes/details");
   };
 
-  const handleEdit = (track: Track) => {
-    navigate(`/admin/tracks/details?id=${track.id}`);
+  const handleEdit = (quiz: Quiz) => {
+    navigate(`/admin/quizzes/details?id=${quiz.id}`);
   };
 
-  const handleDeleteClick = (track: Track) => {
-    setTrackToDelete(track);
+  const handleDeleteClick = (quiz: Quiz) => {
+    setQuizToDelete(quiz);
     setDeleteDialogOpen(true);
     setDeleteError(null);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!trackToDelete || !user?.id) return;
+  // Обработчик удаления теперь принимает refresh как аргумент
+  const handleDeleteConfirm = async (refresh: () => void) => {
+    if (!quizToDelete || !user?.id) return;
     setDeleting(true);
     setDeleteError(null);
     try {
-      await deleteTrack(trackToDelete.id, user.id);
+      await deleteQuiz(quizToDelete.id, user.id);
       setDeleteDialogOpen(false);
-      setTrackToDelete(null);
+      setQuizToDelete(null);
+      refresh(); // обновляем таблицу после удаления
     } catch (e: unknown) {
       if (e instanceof Error) {
         setDeleteError(e.message || t("deleteError"));
@@ -77,28 +77,17 @@ export const AdminTrackTable = () => {
 
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
-    setTrackToDelete(null);
+    setQuizToDelete(null);
     setDeleteError(null);
   };
 
-  const columns: TableColumn<Track>[] = [
-    { label: t("trackTitle"), render: (row) => row.title },
-    { label: t("trackArtist"), render: (row) => row.artist },
+  const columns: TableColumn<Quiz>[] = [
+    { label: t("quizTitle"), render: (row) => row.title },
+    { label: t("quizDescription"), render: (row) => row.description },
+    { label: t("quizRoundCount"), render: (row) => row.roundCount },
     {
-      label: t("trackUrl"),
-      render: (row) => (
-        <Box sx={{ mt: 2 }}>
-          <AudioPlayer
-            src={row.url}
-            onPlay={() => {}}
-            style={{
-              background: theme.palette.background.paper,
-            }}
-            showJumpControls={false}
-            customAdditionalControls={[]}
-          />
-        </Box>
-      ),
+      label: t("quizTracks"),
+      render: (row) => <QuizTracksCell quiz={row} />,
     },
   ];
 
@@ -132,10 +121,10 @@ export const AdminTrackTable = () => {
               marginBottom: "1rem",
             }}
           >
-            {t("adminPanelTracksTitle")}
+            {t("adminPanelQuizzesTitle")}
           </Typography>
-          <PaginatedTable<Track>
-            fetchData={getTracks}
+          <PaginatedTable<Quiz>
+            fetchData={getQuizzes}
             defaultRowsPerPage={10}
           >
             {({ data, loading, error, pagination, refresh }) => (
@@ -144,7 +133,7 @@ export const AdminTrackTable = () => {
                   onCreate={handleCreate}
                   onRefresh={refresh}
                   loading={loading}
-                  createLabel={t("createTrack")}
+                  createLabel={t("createQuiz")}
                   refreshLabel={t("refresh")}
                 />
                 {loading ? (
@@ -157,42 +146,45 @@ export const AdminTrackTable = () => {
                   <Table
                     rows={data}
                     columns={columns}
-                    actions={(track) => (
+                    actions={(quiz) => (
                       <>
-                        <Tooltip title={t("editTrack")}>
-                          <IconButton onClick={() => handleEdit(track)}>
+                        <Tooltip title={t("editQuiz")}>
+                          <IconButton onClick={() => handleEdit(quiz)}>
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("deleteTrack")}>
-                          <IconButton color="error" onClick={() => handleDeleteClick(track)}>
+                        <Tooltip title={t("deleteQuiz")}>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDeleteClick(quiz)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         </Tooltip>
                       </>
                     )}
-                    emptyMessage={t("noTracks")}
+                    emptyMessage={t("noQuizzes")}
                     pagination={pagination}
                   />
                 )}
+                <DialogConfirm
+                  open={deleteDialogOpen}
+                  onClose={handleDeleteCancel}
+                  onConfirm={() => handleDeleteConfirm(refresh)}
+                  loading={deleting}
+                  error={deleteError}
+                  title={t("deleteQuizTitle")}
+                  confirmText={t("delete")}
+                  cancelText={t("cancel")}
+                  loadingText={t("deleting")}
+                  dialogText={t("deleteQuizConfirm")}
+                  confirmColor="error"
+                />
               </>
             )}
           </PaginatedTable>
         </CardContent>
       </Card>
-      <DialogConfirm
-        open={deleteDialogOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        loading={deleting}
-        error={deleteError}
-        title={t("deleteTrackTitle")}
-        confirmText={t("delete")}
-        cancelText={t("cancel")}
-        loadingText={t("deleting")}
-        dialogText={t("deleteTrackConfirm")}
-        confirmColor="error"
-      />
     </div>
   );
 };

@@ -4,6 +4,9 @@ import com.grooveguess.backend.domain.model.Quiz
 import com.grooveguess.backend.domain.model.User
 import com.grooveguess.backend.domain.model.Track
 import java.time.LocalDateTime
+import com.grooveguess.backend.domain.enum.Role
+import com.grooveguess.backend.domain.dto.TrackDto
+
 
 data class QuizRequest(
     val title: String,
@@ -45,3 +48,20 @@ data class QuizResponse(
         )
     }
 }
+
+
+data class UserDto(
+    val id: Long,
+    val username: String,
+    val email: String,
+    val role: Role,
+)
+
+data class QuizDto(
+    val id: Long,
+    val title: String,
+    val description: String?,
+    val roundCount: Int,
+    val creator: UserDto,
+    val tracks: List<TrackDto>
+)
