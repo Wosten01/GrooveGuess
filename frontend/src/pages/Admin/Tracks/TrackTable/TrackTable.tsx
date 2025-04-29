@@ -9,9 +9,12 @@ import {
   Box,
   IconButton,
   Tooltip,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from "@mui/icons-material/Search";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { useTranslation } from "react-i18next";
@@ -21,14 +24,13 @@ import { useAuth } from "../../../../hooks/auth-context";
 import { deleteTrack, getTracks, Track } from "../../../../api/tracks-api";
 import { DialogConfirm, PaginatedTable, Table, TableActions } from "../../../../components";
 
-
 type TableColumn<T> = {
   label: React.ReactNode;
   render: (row: T) => React.ReactNode;
   align?: "left" | "center" | "right";
 };
 
-export const AdminTrackTable = () => {
+export const TrackTable = () => {
   const { t } = useTranslation(TranslationNamespace.Common, {
     keyPrefix: "pages.admin.tracks.table",
   });
@@ -40,6 +42,7 @@ export const AdminTrackTable = () => {
   const [trackToDelete, setTrackToDelete] = useState<Track | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleCreate = () => {
     navigate("/admin/tracks/details");
@@ -101,6 +104,8 @@ export const AdminTrackTable = () => {
     },
   ];
 
+  const fetchData = (page: number, size: number) => getTracks(page, size, search);
+
   return (
     <div
       style={{
@@ -133,8 +138,27 @@ export const AdminTrackTable = () => {
           >
             {t("adminPanelTracksTitle")}
           </Typography>
+          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+            <TextField
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("searchTracks")}
+              size="small"
+              sx={{ width: 320 }}
+              slotProps = {{
+                input:{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }
+              }}
+              variant="outlined"
+            />
+          </Box>
           <PaginatedTable<Track>
-            fetchData={getTracks}
+            fetchData={fetchData}
             defaultRowsPerPage={10}
           >
             {({ data, loading, error, pagination, refresh }) => (

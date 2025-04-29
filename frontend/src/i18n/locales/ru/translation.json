@@ -74,7 +74,8 @@
           "trackTitle": "Название трека",
           "trackArtist": "Исполнитель",
           "trackUrl": "Трек",
-          "creatorId": "Создатель (creatorId)"
+          "creatorId": "Создатель (creatorId)",
+          "searchTracks": "Поиск треков"
         }
       },
       "quizzes": {

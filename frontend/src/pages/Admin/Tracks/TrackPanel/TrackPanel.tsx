@@ -34,7 +34,7 @@ type TrackFormValues = {
   url: string;
 };
 
-export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const TrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { t } = useTranslation(TranslationNamespace.Common, {
     keyPrefix: "pages.admin.tracks.details",
   });
@@ -174,6 +174,7 @@ export const AdminTrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
         <CardContent
           sx={{
             padding: "2.5rem",
+            paddingTop: "0.0rem",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

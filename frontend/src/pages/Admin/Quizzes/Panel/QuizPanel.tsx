@@ -157,7 +157,6 @@ export const QuizPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "100vh",
         background: `linear-gradient(135deg, ${theme.palette.accent.light} 0%, ${theme.palette.pastel.main} 100%)`,
         padding: "2rem",
         fontFamily: theme.typography.fontFamily,
@@ -190,6 +189,7 @@ export const QuizPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
         <CardContent
           sx={{
             padding: "2.5rem",
+            paddingTop: "0.5rem",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

@@ -1,2 +1,2 @@
-export * from "./AdminTrackPanel"
-export * from "./AdminTrackTable"
+export * from "./TrackPanel"
+export * from "./TrackTable"

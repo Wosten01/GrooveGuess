@@ -57,7 +57,8 @@ export const LoginForm = ({
       >
         <CardContent
           sx={{
-            padding: "3rem",
+            padding: "2.5rem",
+            paddingTop: "0.5rem",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
