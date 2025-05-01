@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 
 interface TrackRepository : JpaRepository<Track, Long> {
     fun findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(
@@ -13,6 +14,12 @@ interface TrackRepository : JpaRepository<Track, Long> {
         pageable: Pageable
     ): Page<Track>
 
-    @Query("SELECT t FROM Track t JOIN t.quizzes q WHERE q.id = :quizId")
-    fun findByQuizId(quizId: Long): List<Track>
+    @Query(value = """
+        SELECT t.* FROM tracks t
+        JOIN quiz_tracks qt ON t.id = qt.track_id
+        WHERE qt.quiz_id = :quizId
+        ORDER BY RANDOM()
+        LIMIT :limit
+    """, nativeQuery = true)
+    fun findRandomTracksByQuizIdWithLimit(@Param("quizId") quizId: Long, @Param("limit") limit: Long): List<Track>
 }

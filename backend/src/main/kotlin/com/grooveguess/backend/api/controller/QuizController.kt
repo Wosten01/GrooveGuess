@@ -1,6 +1,5 @@
 package com.grooveguess.backend.api.controller
 
-import com.grooveguess.backend.domain.dto.GameRound
 import com.grooveguess.backend.domain.model.Quiz
 import com.grooveguess.backend.service.QuizService
 import com.grooveguess.backend.domain.dto.AnswerResponse

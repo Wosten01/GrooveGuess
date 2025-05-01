@@ -1,22 +1,22 @@
 package com.grooveguess.backend.domain.dto
 
-data class QuizGameSessionDto(
+import java.util.UUID
+import java.io.Serializable
+
+data class GameSessionDto(
     val sessionId: String,
     val totalRounds: Int,
-    val currentScore: Int
+    val score: Int,
+    val currentRound: Int
 )
 
-data class QuizRoundDto(
-    val roundNumber: Int,
-    val totalRounds: Int,
-    val audioUrl: String,
-    val options: List<OptionDto>
-)
 
-data class OptionDto(
+
+data class TrackOptionDto(
     val id: Long,
-    val title: String
-)
+    val title: String,
+    val artist: String,
+): Serializable
 
 data class AnswerDto(
     val roundNumber: Int,
