@@ -18,6 +18,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toolbar } from "@mui/material";
 import { Scoreboard } from "./pages/Scoreboard";
 import { QuizFeed } from "./pages"; 
+import { Profile } from "./pages/Profile/Profile";
 
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
 
             </Route>
             <Route path="/scoreboard" element={<Scoreboard />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

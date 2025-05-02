@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/auth-context";
 import { NavButton } from "./NavButton";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import QuizIcon from '@mui/icons-material/Quiz';
+import QuizIcon from "@mui/icons-material/Quiz";
 
 export const AppBar: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +30,10 @@ export const AppBar: React.FC = () => {
   const handleLogout = () => {
     logout();
   };
+
+  const handleProfileClick = () =>{
+    navigate("/profile")
+  }
 
   return (
     <MUIAppBar
@@ -68,23 +72,27 @@ export const AppBar: React.FC = () => {
                 label={t("pages.admin.quizzes.table.adminPanelQuizzesTitle")}
                 icon={<QuizIcon />}
               />
-               <NavButton
+              <NavButton
                 allowedRoles={["ADMIN"]}
                 to="/admin/tracks/table"
                 label={t("pages.admin.tracks.table.adminPanelTracksTitle")}
                 icon={<TableChartIcon />}
               />
             </Box>
-            
-            <Tooltip
-              title={
-                <Typography variant="body1" color="info">
-                  {user.username}
-                </Typography>
-              }
+
+            <Button
+            onClick={handleProfileClick}
             >
-              <Avatar src={""}>{user.username[0]}</Avatar>
-            </Tooltip>
+              <Tooltip
+                title={
+                  <Typography variant="body1" color="info">
+                    {user.username}
+                  </Typography>
+                }
+              >
+                <Avatar src={""}>{user.username[0]}</Avatar>
+              </Tooltip>
+            </Button>
 
             <Tooltip title={t("features.logout.title")}>
               <IconButton
