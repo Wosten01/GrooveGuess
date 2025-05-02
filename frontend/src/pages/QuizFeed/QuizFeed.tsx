@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { TranslationNamespace } from "../../i18n";
 import { useNavigate } from "react-router-dom";
+import { startGame } from "../../api/quiz-game-api";
+import { useAuth } from "../../hooks/auth-context";
 
 interface Quiz {
   id: number;
@@ -34,9 +36,11 @@ export const QuizCard: React.FC<{ quiz: Quiz; index: number }> = ({
   const theme = useTheme();
   const { t } = useTranslation(TranslationNamespace.Common);
   const navigate = useNavigate();
-  const handlePlayClick = (e: React.MouseEvent) => {
+  const {user} = useAuth()
+  const handlePlayClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/quizzes/play/${quiz.id}`);
+    const res = await startGame(quiz.id, user?.id)
+    navigate(`/game/player/${user?.id}/session/${res.sessionId}`);
   };
 
   return (

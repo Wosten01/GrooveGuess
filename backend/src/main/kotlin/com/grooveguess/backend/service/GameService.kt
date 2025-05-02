@@ -87,11 +87,6 @@ class GameService(
             currentRoundNumber = 0,
             score = 0,
             completed = false,
-            currentRound = RoundDto(
-                currentRound=0,
-                url = rounds[0].url,
-                options =  rounds[0].options,
-            ),
         )
     }
 
@@ -119,14 +114,47 @@ class GameService(
         }
         
         val nextRound = session.rounds[session.currentRound]
-        
+
         updateSession(session)
         
         return RoundDto(
             currentRound = session.currentRound,
             url = nextRound.url,
-            options = nextRound.options
+            options = nextRound.options,
         )
+    }
+
+    fun getCurrentRound(sessionId: String, userId: Long): GameSessionDto {
+        logger.debug("Getting current round for session $sessionId")
+        
+        val session = getSession(sessionId, userId)
+        
+        if (session.completed) {
+            logger.debug("Game is already completed for session $sessionId")
+            throw IllegalStateException("Game is already completed")
+        }
+        
+        if (session.currentRound < 0 || session.currentRound >= session.rounds.size) {
+            logger.warn("Invalid current round number: ${session.currentRound}")
+            throw IllegalStateException("Invalid current round number")
+        }
+        
+        val currentRound = session.rounds[session.currentRound]
+
+
+        return GameSessionDto(
+            sessionId = sessionId,
+            totalRounds = session.rounds.size,
+            currentRoundNumber = session.currentRound,
+            score = session.score,
+            completed = false,
+            currentRound = RoundDto(
+                currentRound = session.currentRound,
+                url = currentRound.url,
+                options = currentRound.options
+            ),
+        )
+    
     }
 
     fun submitAnswer(sessionId: String, answer: AnswerDto, userId : Long): AnswerResultDto {

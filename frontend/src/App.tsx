@@ -1,3 +1,4 @@
+
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./theme";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -9,13 +10,15 @@ import {
   TrackTable,
   QuizPanel,
   QuizTable,
-  QuizGameWrapper,
+  Game,
+  GameResults,
 } from "./pages";
 import { AppBar } from "./components";
 import { AuthProvider } from "./context/AuthContext";
 import { Toolbar } from "@mui/material";
 import { Scoreboard } from "./pages/Scoreboard";
 import { QuizFeed } from "./pages"; 
+
 
 function App() {
   return (
@@ -35,7 +38,12 @@ function App() {
               <Route index element={<QuizFeed />} />
               <Route path="details" element={<QuizPanel />} />
               <Route path="table" element={<QuizTable />} />
-              <Route path="play/:quizId" element={<QuizGameWrapper />} />
+            </Route>
+
+            <Route path="game">
+              <Route path="player/:userId/session/:sessionId" element={<Game />} />
+              <Route path="player/:userId/session/:sessionId/results" element={<GameResults />} />
+              {/* <Route path="player/:userId/session/:sessionId/lobby" element={<GameLobby />} /> */}
             </Route>
 
             <Route path="admin">
@@ -48,6 +56,7 @@ function App() {
                 <Route path="details" element={<QuizPanel />} />
                 <Route path="table" element={<QuizTable />} />
               </Route>
+
             </Route>
             <Route path="/scoreboard" element={<Scoreboard />} />
           </Routes>

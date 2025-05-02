@@ -14,14 +14,14 @@ class GameController(private val gameService: GameService) {
 
     @PostMapping("/{quizId}/start")
     fun startGame(@PathVariable quizId: Long, @RequestParam userId: Long): ResponseEntity<GameSessionDto> {
-        logger.info("Starting game for quiz $quizId and user $userId")
+        logger.debug("Starting game for quiz $quizId and user $userId")
         val session = gameService.startGame(quizId, userId)
         return ResponseEntity.ok(session)
     }
 
     @GetMapping("/player/{userId}/session/{sessionId}/next-round")
     fun getNextRound(@PathVariable sessionId: String, @PathVariable userId: Long): ResponseEntity<RoundDto> {
-        logger.info("Getting next round for session $sessionId and user $userId")
+        logger.debug("Getting next round for session $sessionId and user $userId")
         val round = gameService.getNextRound(sessionId, userId)
         return ResponseEntity.ok(round)
     }
@@ -32,14 +32,22 @@ class GameController(private val gameService: GameService) {
         @PathVariable userId: Long,
         @RequestBody answer: AnswerDto
     ): ResponseEntity<AnswerResultDto> {
-        logger.info("Submitting answer for session $sessionId, user $userId, round ${answer.roundNumber}")
+        logger.debug("Submitting answer for session $sessionId, user $userId, round ${answer.roundNumber}")
         val result = gameService.submitAnswer(sessionId, answer, userId)
         return ResponseEntity.ok(result)
     }
+
+    @GetMapping("/player/{userId}/session/{sessionId}/current-round")
+    fun getCurrentRound(@PathVariable sessionId: String, @PathVariable userId: Long): ResponseEntity<GameSessionDto> {
+        logger.debug("Getting current round for session $sessionId and user $userId")
+        val round = gameService.getCurrentRound(sessionId, userId)
+        return ResponseEntity.ok(round)
+    }
+
     
     @GetMapping("/player/{userId}/session/{sessionId}/results")
     fun getGameResults(@PathVariable sessionId: String, @PathVariable userId: Long): ResponseEntity<GameResultsDto> {
-        logger.info("Getting game results for session $sessionId and user $userId")
+        logger.debug("Getting game results for session $sessionId and user $userId")
         val results = gameService.getGameResults(sessionId, userId)
         return ResponseEntity.ok(results)
     }
