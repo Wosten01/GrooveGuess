@@ -11,6 +11,10 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.grooveguess.backend.domain.model.GameSession
+import org.springframework.stereotype.Component
 
 @Configuration
 class RedisConfig {
@@ -28,11 +32,18 @@ class RedisConfig {
     }
 
     @Bean
+    fun jacksonObjectMapper(): ObjectMapper {
+        return ObjectMapper()
+            .registerModule(KotlinModule.Builder().build())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    }
+
+    @Bean
     fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
         val template = RedisTemplate<String, Any>()
         template.connectionFactory = redisConnectionFactory
         
-        val objectMapper = ObjectMapper().registerKotlinModule()
+        val objectMapper = jacksonObjectMapper()
         
         template.keySerializer = StringRedisSerializer()
         template.valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper)
@@ -40,5 +51,15 @@ class RedisConfig {
         template.hashValueSerializer = GenericJackson2JsonRedisSerializer(objectMapper)
         
         return template
+    }
+    
+}
+
+@Component
+class RedisUtils(private val objectMapper: ObjectMapper) {
+    
+    fun <T> convertMapToObject(map: Map<*, *>, targetClass: Class<T>): T {
+        val json = objectMapper.writeValueAsString(map)
+        return objectMapper.readValue(json, targetClass)
     }
 }

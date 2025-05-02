@@ -6,11 +6,11 @@ import java.io.Serializable
 data class GameSessionDto(
     val sessionId: String,
     val totalRounds: Int,
+    val currentRoundNumber: Int,
     val score: Int,
-    val currentRound: Int
+    val completed: Boolean = false,
+    val currentRound: RoundDto? = null
 )
-
-
 
 data class TrackOptionDto(
     val id: Long,
@@ -26,5 +26,29 @@ data class AnswerDto(
 data class AnswerResultDto(
     val correct: Boolean,
     val points: Int,
-    val isLastRound: Boolean
+    val isLastRound: Boolean,
+    val finalScore: Int = 0
+)
+
+data class RoundDto(
+    val currentRound: Int,
+    val url: String,
+    val options: List<TrackOptionDto>
+)
+
+data class GameResultsDto(
+    val quizId: Long,
+    val totalRounds: Int,
+    val score: Int,
+    val tracks: List<TrackResultDto>
+)
+
+data class TrackResultDto(
+    val roundNumber: Int,
+    val trackId: Long,
+    val title: String,
+    val artist: String,
+    val url: String,
+    val wasGuessed: Boolean,
+    val options: List<TrackOptionDto>
 )
