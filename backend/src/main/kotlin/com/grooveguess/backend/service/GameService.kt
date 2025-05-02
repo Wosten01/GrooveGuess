@@ -229,7 +229,7 @@ class GameService(
         
         if (session.userId != userId) {
             logger.warn("User $userId does not own session")
-            throw IllegalAccessException("User has no access to this session")
+            throw IllegalAccessException("You don't have access to this session")
         }
         
         if (!session.completed && !isGameFinished(session)) {
@@ -372,7 +372,7 @@ class GameService(
 
         if (session.userId != userId) {
             logger.warn("User $userId does not own session")
-            throw AccessDeniedException("User has no access to this session")
+            throw AccessDeniedException("You don't have access to this session")
         }
         
         return session

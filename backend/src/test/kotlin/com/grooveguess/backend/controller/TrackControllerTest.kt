@@ -5,6 +5,7 @@ import com.grooveguess.backend.domain.dto.TrackDto
 import com.grooveguess.backend.domain.dto.TrackRequest
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.exception.AccessDeniedException
+import com.grooveguess.backend.exception.ResourceNotFoundException
 import com.grooveguess.backend.service.AudioVerificationResult
 import com.grooveguess.backend.service.TrackService
 import org.junit.jupiter.api.Test
@@ -66,6 +67,24 @@ class TrackControllerTest {
             .andExpect(jsonPath("$.url").value("http://example.com/audio.mp3"))
     }
 
+    @Test
+    fun `createTrack should return forbidden when user is not admin`() {
+        val creatorId = 2L
+        val trackRequest = TrackRequest(
+            title = "Test Track",
+            artist = "Test Artist",
+            url = "http://example.com/audio.mp3"
+        )
+
+        `when`(trackService.create(any(), eq(creatorId))).thenThrow(AccessDeniedException("User is not admin"))
+
+        mockMvc.perform(post("/api/tracks")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(trackRequest))
+                .param("creatorId", creatorId.toString()))
+            .andExpect(status().isForbidden)
+    }
 
     @Test
     fun `createTrack should return bad request on error`() {
@@ -76,7 +95,7 @@ class TrackControllerTest {
             url = "invalid-url"
         )
 
-        `when`(trackService.create(any(), eq(creatorId))).thenThrow(RuntimeException("Invalid URL"))
+        `when`(trackService.create(any(), eq(creatorId))).thenThrow(IllegalArgumentException("Invalid URL"))
 
         mockMvc.perform(post("/api/tracks")
                 .with(csrf())
@@ -112,7 +131,7 @@ class TrackControllerTest {
     fun `getTrackById should return not found when track does not exist`() {
         val trackId = 999L
 
-        `when`(trackService.findById(trackId)).thenThrow(RuntimeException("Track not found"))
+        `when`(trackService.findById(trackId)).thenThrow(ResourceNotFoundException("Track not found with id: $trackId"))
 
         mockMvc.perform(get("/api/tracks/$trackId")
                 .with(csrf())
@@ -190,7 +209,7 @@ class TrackControllerTest {
             url = "http://example.com/audio.mp3"
         )
 
-        `when`(trackService.update(eq(trackId), any(), eq(userId))).thenReturn(null)
+        `when`(trackService.update(eq(trackId), any(), eq(userId))).thenThrow(ResourceNotFoundException("Track not found with id: $trackId"))
 
         mockMvc.perform(put("/api/tracks/$trackId")
                 .with(csrf())
@@ -198,6 +217,26 @@ class TrackControllerTest {
                 .content(objectMapper.writeValueAsString(trackRequest))
                 .param("userId", userId.toString()))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `updateTrack should return forbidden when user is not admin`() {
+        val trackId = 1L
+        val userId = 2L
+        val trackRequest = TrackRequest(
+            title = "Updated Track",
+            artist = "Test Artist",
+            url = "http://example.com/audio.mp3"
+        )
+
+        `when`(trackService.update(eq(trackId), any(), eq(userId))).thenThrow(AccessDeniedException("User is not admin"))
+
+        mockMvc.perform(put("/api/tracks/$trackId")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(trackRequest))
+                .param("userId", userId.toString()))
+            .andExpect(status().isForbidden)
     }
 
     @Test
@@ -210,7 +249,7 @@ class TrackControllerTest {
             url = "invalid-url"
         )
 
-        `when`(trackService.update(eq(trackId), any(), eq(userId))).thenThrow(RuntimeException("Invalid URL"))
+        `when`(trackService.update(eq(trackId), any(), eq(userId))).thenThrow(IllegalArgumentException("Invalid URL"))
 
         mockMvc.perform(put("/api/tracks/$trackId")
                 .with(csrf())
@@ -234,6 +273,19 @@ class TrackControllerTest {
             .andExpect(status().isNoContent)
     }
 
+    @Test
+    fun `deleteTrack should return forbidden when user is not admin`() {
+        val trackId = 1L
+        val userId = 2L
+
+        doThrow(AccessDeniedException("User is not admin")).`when`(trackService).delete(trackId, userId)
+
+        mockMvc.perform(delete("/api/tracks/$trackId")
+                .with(csrf())
+                .param("userId", userId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden)
+    }
 
     @Test
     fun `validateAudioUrl should return ok for valid url`() {

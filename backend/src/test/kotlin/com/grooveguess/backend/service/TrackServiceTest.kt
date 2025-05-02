@@ -139,9 +139,7 @@ class TrackServiceTest {
 
     @Test
     fun `verifyAudioUrl returns valid for good url`() {
-        // Для ускорения теста можно замокать HTTP-клиент, но здесь тестируем реальный метод
         val result = service.verifyAudioUrl("https://file-examples.com/storage/fe7d258bd9680a7429c6b40/2017/11/file_example_MP3_700KB.mp3")
-        // Не гарантируем что URL всегда будет доступен, поэтому просто проверим тип результата
         assertNotNull(result)
     }
 

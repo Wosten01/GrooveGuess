@@ -155,7 +155,7 @@ class GameControllerTest {
         val userId = 999L
 
         `when`(gameService.getNextRound(sessionId, userId))
-            .thenThrow(AccessDeniedException("User has no access to this session"))
+            .thenThrow(AccessDeniedException("You don't have access to this session"))
 
         mockMvc.perform(get("/api/quiz-game/player/$userId/session/$sessionId/next-round")
                 .with(csrf())
@@ -251,7 +251,7 @@ class GameControllerTest {
         val answerDto = AnswerDto(roundNumber = 1, optionId = 3L)
 
         `when`(gameService.submitAnswer(sessionId, answerDto, userId))
-            .thenThrow(AccessDeniedException("User has no access to this session"))
+            .thenThrow(AccessDeniedException("You don't have access to this session"))
 
         mockMvc.perform(post("/api/quiz-game/player/$userId/session/$sessionId/answer")
                 .with(csrf())
@@ -344,7 +344,7 @@ class GameControllerTest {
         val userId = 999L
 
         `when`(gameService.getGameResults(sessionId, userId))
-            .thenThrow(AccessDeniedException("User has no access to this session"))
+            .thenThrow(AccessDeniedException("You don't have access to this session"))
 
         mockMvc.perform(get("/api/quiz-game/player/$userId/session/$sessionId/results")
                 .with(csrf())
