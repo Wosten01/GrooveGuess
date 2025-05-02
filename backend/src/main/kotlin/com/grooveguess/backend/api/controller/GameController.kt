@@ -1,6 +1,7 @@
 package com.grooveguess.backend.api.controller
 
 import com.grooveguess.backend.domain.dto.*
+import com.grooveguess.backend.exception.AccessDeniedException
 import com.grooveguess.backend.service.GameService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -33,6 +34,10 @@ class GameController(private val gameService: GameService) {
         return try {
             val round = gameService.getNextRound(sessionId, userId)
             ResponseEntity.ok(round)
+        } catch (e: AccessDeniedException) {
+            logger.warn("User $userId has no access to session $sessionId")
+            ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("message" to "You don't have access to this session"))
         } catch (e: IllegalAccessException) {
             logger.warn("User $userId has no access to session $sessionId")
             ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -76,6 +81,10 @@ class GameController(private val gameService: GameService) {
         return try {
             val result = gameService.submitAnswer(sessionId, answer, userId)
             ResponseEntity.ok(result)
+        } catch (e: AccessDeniedException) {
+            logger.warn("User $userId has no access to session $sessionId")
+            ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("message" to "You don't have access to this session"))
         } catch (e: IllegalAccessException) {
             logger.warn("User $userId has no access to session $sessionId")
             ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -109,6 +118,10 @@ class GameController(private val gameService: GameService) {
         return try {
             val results = gameService.getGameResults(sessionId, userId)
             ResponseEntity.ok(results)
+        } catch (e: AccessDeniedException) {
+            logger.warn("User $userId has no access to session $sessionId")
+            ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("message" to "You don't have access to this session"))
         } catch (e: IllegalAccessException) {
             logger.warn("User $userId has no access to session $sessionId")
             ResponseEntity.status(HttpStatus.FORBIDDEN)

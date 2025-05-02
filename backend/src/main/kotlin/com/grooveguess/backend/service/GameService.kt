@@ -20,6 +20,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import kotlin.math.round
 import org.slf4j.LoggerFactory
 import com.grooveguess.backend.config.RedisUtils
+import com.grooveguess.backend.exception.AccessDeniedException
 
 @Service
 class GameService(
@@ -324,6 +325,7 @@ class GameService(
         val rawData = redisTemplate.opsForValue().get(sessionKey)
         
         if (rawData == null) {
+            // Try to get from completed sessions
             val completedSessionKey = "$COMPLETED_SESSION_PREFIX$sessionId"
             val completedData = redisTemplate.opsForValue().get(completedSessionKey)
             
@@ -347,7 +349,7 @@ class GameService(
             
             if (completedSession.userId != userId) {
                 logger.warn("User $userId does not own completed session")
-                throw IllegalAccessException("User has no access to this completed session")
+                throw AccessDeniedException("User has no access to this completed session")
             }
             
             return completedSession
@@ -370,7 +372,7 @@ class GameService(
 
         if (session.userId != userId) {
             logger.warn("User $userId does not own session")
-            throw IllegalAccessException("User has no access to this session")
+            throw AccessDeniedException("User has no access to this session")
         }
         
         return session
