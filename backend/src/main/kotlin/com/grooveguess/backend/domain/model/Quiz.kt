@@ -29,4 +29,8 @@ data class Quiz(
 
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
-)
+) {
+    override fun toString(): String {
+        return "Quiz(id=$id, title='$title', description='$description', roundCount=$roundCount, creatorId=${creator.id}, tracksCount=${tracks.size}, createdAt=$createdAt)"
+    }
+}

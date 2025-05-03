@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await logoutUser();
       } catch  {
-        // Можно обработать ошибку, если нужно
+        // Error
       }
       setUser(null);
   };
@@ -32,8 +32,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchUser();
   }, []);
 
+  const updateUser = (userData: User) => {
+    setUser(userData);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, fetchUser }}>
+    <AuthContext.Provider value={{ user, setUser, logout, fetchUser, updateUser}}>
       {children}
     </AuthContext.Provider>
   );

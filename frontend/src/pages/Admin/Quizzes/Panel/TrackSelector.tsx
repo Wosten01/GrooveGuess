@@ -76,7 +76,7 @@ export const TrackSelector: React.FC<TrackSelectorProps> = ({
             key={track.id}
             label={
               track.artist
-                ? `${track.title} — ${track.artist}`
+                ? `${track.artist} — ${track.title}`
                 : track.title
             }
             onDelete={() => handleRemove(track)}

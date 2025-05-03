@@ -43,6 +43,7 @@ data class UserAnswerDto(
 )
 
 data class GameResultsDto(
+    val quizTitle: String,
     val quizId: Long,
     val totalRounds: Int,
     val score: Int,

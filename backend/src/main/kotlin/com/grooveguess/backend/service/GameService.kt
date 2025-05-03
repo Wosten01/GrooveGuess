@@ -32,6 +32,7 @@ class GameService(
     private val redisTemplate: RedisTemplate<String, Any>,
     private val redisUtils: RedisUtils,
     private val userService: UserService,
+    private val quizService: QuizService,
 ) {
     private val logger = LoggerFactory.getLogger(GameService::class.java)
 
@@ -303,13 +304,16 @@ class GameService(
                 userAnswer = userAnswer
             )
         }
+
+        val quiz = quizService.find(session.quizId)
         
         return GameResultsDto(
             quizId = session.quizId,
             totalRounds = session.rounds.size,
             score = session.score,
             tracks = trackResults,
-            userAnswers = session.userAnswers
+            userAnswers = session.userAnswers,
+            quizTitle = quiz.title
         )
     }
 

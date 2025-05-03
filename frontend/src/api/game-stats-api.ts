@@ -5,6 +5,7 @@ export interface RecentGameDto {
   userId: number;
   username: string;
   quizId: number;
+  quizTitle: string;
   score: number;
   totalRounds: number;
   correctAnswers: number;

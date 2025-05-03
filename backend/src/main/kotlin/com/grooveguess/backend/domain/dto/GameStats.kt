@@ -5,6 +5,7 @@ data class RecentGameDto(
     val userId: Long,
     val username: String,
     val quizId: Long,
+    val quizTitle: String,
     val score: Int,
     val totalRounds: Int,
     val correctAnswers: Int,

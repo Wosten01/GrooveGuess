@@ -10,6 +10,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 import { Quiz } from "../../../../api/quiz-api";
 import { useTranslation } from "react-i18next";
@@ -42,12 +43,14 @@ export const QuizTracksCell: React.FC<QuizTracksCellProps> = ({ quiz }) => {
         ) : (
           <>
             {visibleTracks.map((track) => (
+              <Tooltip title={`${track.artist} — ${track.title}`}>
               <Chip
                 key={track.id}
-                label={`${track.title} - ${track.artist}`}
+                label={`${track.artist} — ${track.title}`}
                 size="small"
-                sx={{ mb: 0.5,  }}
+                sx={{ mb: 0.5, maxWidth: 200, cursor: "pointer" }}
               />
+              </Tooltip>
             ))}
             {tracks.length > MAX_VISIBLE_CHIPS && (
               <Button

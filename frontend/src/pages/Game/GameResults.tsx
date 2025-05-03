@@ -161,7 +161,7 @@ export const GameResults: React.FC = () => {
               {t('title')}
             </Typography>
             <Typography variant="h5" gutterBottom>
-              {t('quizNumber', { id: results.quizId })}
+               {results.quizTitle}
             </Typography>
             
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, my: 3 }}>

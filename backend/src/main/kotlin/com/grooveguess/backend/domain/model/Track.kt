@@ -23,4 +23,8 @@ data class Track(
 
     @ManyToMany(mappedBy = "tracks")
     val quizzes: List<Quiz> = emptyList(),
-)
+) {
+    override fun toString(): String {
+        return "Track(id=$id, title='$title', artist='$artist', url='$url', quizzesCount=${quizzes.size})"
+    }
+}

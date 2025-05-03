@@ -89,20 +89,17 @@ export const GameStats: React.FC = () => {
     setPage(value - 1);
   };
 
-  // Fetch data based on current tab and pagination
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         if (tabValue === 0) {
-          // Recent Games tab - requires user ID
           if (user) {
             const response = await getRecentGames(page, pageSize, user.id);
             setRecentGames(response.games);
             setTotalPages(response.totalPages);
           }
         } else if (tabValue === 1 && user) {
-          // My Stats tab
           const response = await getRecentGames(page, pageSize, user.id);
           setRecentGames(response.games);
           setTotalPages(response.totalPages);
@@ -228,7 +225,6 @@ export const GameStats: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>{t('table.date')}</TableCell>
-              <TableCell>{t('table.player')}</TableCell>
               <TableCell>{t('table.quiz', { id: '' })}</TableCell>
               <TableCell>{t('table.score')}</TableCell>
               <TableCell>{t('table.accuracy')}</TableCell>
@@ -251,8 +247,7 @@ export const GameStats: React.FC = () => {
                   sx={{ cursor: "pointer" }}
                 >
                   <TableCell>{formatDate(game.timestamp)}</TableCell>
-                  <TableCell>{game.username}</TableCell>
-                  <TableCell>{t('table.quiz', { id: game.quizId })}</TableCell>
+                  <TableCell>{game.quizTitle ? game.quizTitle : t('table.quizExample', { id: game.quizId})}</TableCell>
                   <TableCell>{game.score}</TableCell>
                   <TableCell>
                     <Tooltip title={getAccuracyLabel(accuracy)}>

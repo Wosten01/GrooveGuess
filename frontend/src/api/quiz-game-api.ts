@@ -59,6 +59,7 @@ export type TrackResultDto = {
 
 export type GameResultsDto = {
   quizId: number;
+  quizTitle: string;
   totalRounds: number;
   score: number;
   tracks: TrackResultDto[];

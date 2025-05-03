@@ -649,7 +649,11 @@ export const Game: React.FC = () => {
               <Grid container spacing={2}>
                 {gameSession.currentRound.options &&
                   gameSession.currentRound.options.map((option, index) => (
-                    <Grid size={{ xs: 12, sm: 6 }} key={option.id}>
+                    <Grid
+                      size={{ xs: 12, sm: 6 }}
+                      key={option.id}
+                      sx={{ display: "flex" }}
+                    >
                       <OptionButton
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -666,6 +670,7 @@ export const Game: React.FC = () => {
                           !submitting &&
                           handleOptionSelect(option)
                         }
+                        style={{ width: "100%", height: "100%" }}
                       >
                         <Box
                           sx={{
@@ -690,6 +695,10 @@ export const Game: React.FC = () => {
                               showResult || submitting ? "default" : "pointer",
                             opacity: showResult || submitting ? 0.9 : 1,
                             transition: "all 0.2s ease",
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
                             "&:hover": {
                               backgroundColor:
                                 !showResult && !submitting

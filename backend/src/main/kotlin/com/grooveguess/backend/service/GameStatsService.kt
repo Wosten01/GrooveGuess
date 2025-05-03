@@ -18,7 +18,8 @@ import java.time.ZoneOffset
 class GameStatsService(
     private val redisTemplate: RedisTemplate<String, Any>,
     private val redisUtils: RedisUtils,
-    private val userService: UserService
+    private val userService: UserService,
+    private val quizService: QuizService,
 ) {
     private val logger = LoggerFactory.getLogger(GameStatsService::class.java)
     
@@ -115,8 +116,11 @@ class GameStatsService(
         val username = user?.username ?: "Unknown User"
         
         val correctAnswers = session.wonRounds.size
+
+        val quiz = quizService.find(session.quizId)
         
         return RecentGameDto(
+            quizTitle = quiz.title,
             sessionId = session.sessionId,
             userId = session.userId,
             username = username,
