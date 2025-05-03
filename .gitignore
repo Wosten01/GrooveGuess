@@ -18,3 +18,5 @@ application-dev.yml
 
 node_modules
 .qodo
+
+/music

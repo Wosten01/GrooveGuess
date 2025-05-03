@@ -46,7 +46,7 @@ class GameStatsService(
                 }
             }
             .filter { session -> userId == null || session.userId == userId }
-            .sortedByDescending { it.sessionId }
+            .sortedByDescending {  it.timestamp  }
             .map { session -> convertToRecentGameDto(session) }
             .toList()
         

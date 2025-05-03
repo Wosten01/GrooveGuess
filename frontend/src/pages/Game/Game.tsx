@@ -40,7 +40,7 @@ interface AnswerResult {
   finalScore?: number;
 }
 
-const TIME = 5;
+const TIME = 15;
 
 export const Game: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();

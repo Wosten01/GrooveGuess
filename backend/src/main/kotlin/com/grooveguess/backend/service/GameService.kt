@@ -9,6 +9,9 @@ import com.grooveguess.backend.domain.model.GameSession
 import com.grooveguess.backend.domain.model.Round
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
 import org.springframework.data.redis.core.RedisTemplate
@@ -209,7 +212,6 @@ class GameService(
         if (isLastRound) {
             completeGame(session)
             userService.addScore(userId, session.score)
-            
         } else {
             updateSession(session)
         }
@@ -226,6 +228,8 @@ class GameService(
         logger.debug("Completing game for session ${session.sessionId}")
         
         session.completed = true
+
+        session.timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
         
         val activeSessionKey = "$SESSION_PREFIX${session.sessionId}"
         val completedSessionKey = "$COMPLETED_SESSION_PREFIX${session.sessionId}"

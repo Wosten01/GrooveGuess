@@ -80,7 +80,16 @@ export const TrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
   const validationSchema = Yup.object({
     title: Yup.string().required(t("fillAllFields")),
     artist: Yup.string().required(t("fillAllFields")),
-    url: Yup.string().url(t("invalidUrl")).required(t("fillAllFields")),
+    url: Yup.string()
+    .test("is-url-valid", t("invalidUrl"), (value) => {
+      try {
+        new URL(value?.startsWith('http') ? value : `http://${value}`);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .required(t("fillAllFields")),
   });
 
   const handleSubmit = async (

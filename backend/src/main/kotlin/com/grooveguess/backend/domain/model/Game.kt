@@ -5,6 +5,9 @@ import com.grooveguess.backend.domain.dto.TrackOptionDto
 import com.grooveguess.backend.domain.dto.UserAnswerDto
 import java.io.Serializable
 
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+
 data class GameSession(
     val sessionId: String,
     val quizId: Long,
@@ -15,6 +18,7 @@ data class GameSession(
     var completed: Boolean = false,
     var wonRounds: List<Int> = emptyList(),
     var userAnswers: List<UserAnswerDto> = emptyList(),
+    var timestamp: Long = -1,
 ) : Serializable
 
 data class Round(

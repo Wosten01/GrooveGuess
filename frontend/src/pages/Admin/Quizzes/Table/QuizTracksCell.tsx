@@ -20,7 +20,7 @@ interface QuizTracksCellProps {
   onEditTracks?: (quiz: Quiz) => void;
 }
 
-const MAX_VISIBLE_CHIPS = 2;
+const MAX_VISIBLE_CHIPS = 4;
 
 export const QuizTracksCell: React.FC<QuizTracksCellProps> = ({ quiz }) => {
   const { t } = useTranslation(TranslationNamespace.Common, {
@@ -46,7 +46,7 @@ export const QuizTracksCell: React.FC<QuizTracksCellProps> = ({ quiz }) => {
                 key={track.id}
                 label={`${track.title} - ${track.artist}`}
                 size="small"
-                sx={{ mb: 0.5, maxWidth: 120 }}
+                sx={{ mb: 0.5,  }}
               />
             ))}
             {tracks.length > MAX_VISIBLE_CHIPS && (

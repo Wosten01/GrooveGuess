@@ -15,6 +15,7 @@ import org.apache.hc.core5.http.HttpStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 
 data class AudioVerificationResult(
@@ -57,10 +58,21 @@ class TrackService(
             RuntimeException("Track not found")
         }
 
-        fun findAll(page: Int, size: Int, search: String? = null): Page<TrackDto> {
-            val pageable = PageRequest.of(page, size)
+        fun findAll(
+            page: Int, 
+            size: Int, 
+            search: String? = null, 
+            sortBy: String = "id", 
+            sortDirection: String = "asc"
+        ): Page<TrackDto> {
+            // Create sort object based on parameters
+            val direction = if (sortDirection.equals("asc", ignoreCase = true)) 
+                Sort.Direction.DESC else Sort.Direction.ASC
+            val sort = Sort.by(direction, sortBy)
+            val pageable = PageRequest.of(page, size, sort)
+            
             val trimmedSearch = search?.trim()
-            logger.debug("Searching tracks with term: '$trimmedSearch'")
+            logger.debug("Searching tracks with term: '$trimmedSearch', sorting by: $sortBy $sortDirection")
         
             val trackPage: Page<Track> = if (!trimmedSearch.isNullOrEmpty()) {
                 trackRepository.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(
