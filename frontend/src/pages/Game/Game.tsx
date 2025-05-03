@@ -60,7 +60,6 @@ export const Game: React.FC = () => {
   const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
   const [showResult, setShowResult] = useState<boolean>(false);
   const [authChecked, setAuthChecked] = useState<boolean>(false);
-  const [currentScore, setCurrentScore] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
   const [muted, setMuted] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
@@ -117,7 +116,6 @@ export const Game: React.FC = () => {
 
       setGameSession(response.data);
 
-      setCurrentScore(response.data.score || 0);
       setTotalScore(response.data.score || 0);
 
       const roundTimeLimit = TIME;
@@ -221,16 +219,12 @@ export const Game: React.FC = () => {
         }
   
         if (result.correct) {
-          setCurrentScore(result.points);
           setTotalScore((prevScore) => prevScore + result.points);
-        } else {
-          setCurrentScore(0);
-        }
+        } 
   
         if (result.isLastRound) {
           if (result.finalScore !== undefined) {
             setTotalScore(result.finalScore);
-            setCurrentScore(0);
           }
           
           setTimeout(() => {
@@ -713,12 +707,6 @@ export const Game: React.FC = () => {
               )}
 
               <ScoreDisplay>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">
-                    Round Score
-                  </Typography>
-                  <Typography variant="h6">{currentScore}</Typography>
-                </Box>
                 <Box sx={{ textAlign: "right" }}>
                   <Typography variant="body2" color="textSecondary">
                     Total Score
