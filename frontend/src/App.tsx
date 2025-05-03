@@ -1,4 +1,3 @@
-
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./theme";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -16,11 +15,10 @@ import {
   Profile,
   Scoreboard,
 } from "./pages";
-import { AppBar } from "./components";
+import { AppBar, ProtectedRoute } from "./components";
 import { AuthProvider } from "./context/AuthContext";
 import { Toolbar } from "@mui/material";
-import { QuizFeed } from "./pages"; 
-
+import { QuizFeed } from "./pages";
 
 function App() {
   return (
@@ -31,39 +29,95 @@ function App() {
           <Toolbar />
           <Routes>
             <Route path="/" element={<WelcomePage />} />
-            <Route>
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+
+            <Route path="game">
+              <Route
+                path="player/:userId/session/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <Game />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="player/:userId/session/:sessionId/results"
+                element={
+                  <ProtectedRoute>
+                    <GameResults />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             <Route path="quizzes">
-              <Route index element={<QuizFeed />} />
-              <Route path="details" element={<QuizPanel />} />
-              <Route path="table" element={<QuizTable />} />
-            </Route>
-
-            <Route path="game">
-              <Route path="player/:userId/session/:sessionId" element={<Game />} />
-              <Route path="player/:userId/session/:sessionId/results" element={<GameResults />} />
-              {/* <Route path="player/:userId/session/:sessionId/lobby" element={<GameLobby />} /> */}
+              <Route
+                index
+                element={
+                  <ProtectedRoute>
+                    <QuizFeed />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             <Route path="admin">
               <Route path="tracks">
-                <Route path="details" element={<TrackPanel />} />
-                <Route path="table" element={<TrackTable />} />
+                <Route
+                  path="details"
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <TrackPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="table"
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <TrackTable />
+                    </ProtectedRoute>
+                  }
+                />
+                </Route>
+                <Route path="quizzes">
+                  <Route
+                    path="details"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <QuizPanel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="table"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <QuizTable />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
               </Route>
 
-              <Route path="quizzes">
-                <Route path="details" element={<QuizPanel />} />
-                <Route path="table" element={<QuizTable />} />
-              </Route>
-
-            </Route>
             <Route path="/scoreboard" element={<Scoreboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/results" element={<GameStats />} />
-            
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/results"
+              element={
+                <ProtectedRoute>
+                  <GameStats />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
