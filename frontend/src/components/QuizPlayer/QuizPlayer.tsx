@@ -60,7 +60,6 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({ quizId, userId }) => {
           : `Incorrect. Correct track was ID ${correctTrackId}.`
       );
 
-      // Перейти к следующему раунду через 2 секунды
       setTimeout(() => {
         setCurrentRound(prev => prev + 1);
         setMessage('');
@@ -70,7 +69,6 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({ quizId, userId }) => {
     }
   };
 
-  // Загрузить раунды при монтировании
   useState(() => {
     fetchRounds();
   });

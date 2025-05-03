@@ -52,7 +52,6 @@ class GameService(
         val sessionId = UUID.randomUUID().toString()
         val sessionKey = "$SESSION_PREFIX$sessionId"
         
-        // TODO: Added TracksPerRound
         val optionsPerRound = 2
 
         val limit = quiz.roundCount * optionsPerRound.toLong()

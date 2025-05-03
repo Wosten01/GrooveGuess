@@ -1,11 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Alert, Box, Button, Container, Typography, useTheme, alpha } from "@mui/material";
+import { Box, Button, Container, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { TranslationNamespace } from "../../i18n";
 import { motion } from "framer-motion";
-import LockIcon from "@mui/icons-material/Lock";
-import PersonIcon from "@mui/icons-material/Person";
 import { useAuth } from "../../hooks/auth-context";
 
 interface ProtectedRouteProps {

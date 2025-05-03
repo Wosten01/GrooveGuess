@@ -19,7 +19,6 @@ import java.time.LocalDateTime
 class SpringMvcExceptionHandler : ResponseEntityExceptionHandler() {
     
     
-    // Переопределение метода для обработки ошибок валидации
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
         headers: HttpHeaders,
@@ -42,7 +41,6 @@ class SpringMvcExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
     
-    // Переопределение метода для обработки ошибок чтения JSON
     override fun handleHttpMessageNotReadable(
         ex: HttpMessageNotReadableException,
         headers: HttpHeaders,
@@ -60,7 +58,6 @@ class SpringMvcExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
     
-    // Переопределение метода для обработки отсутствующих параметров
     override fun handleMissingServletRequestParameter(
         ex: MissingServletRequestParameterException,
         headers: HttpHeaders,
@@ -78,7 +75,6 @@ class SpringMvcExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
     
-    // Обработка ошибок типов параметров
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleMethodArgumentTypeMismatch(
         ex: MethodArgumentTypeMismatchException,

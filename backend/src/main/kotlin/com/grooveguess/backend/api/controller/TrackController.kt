@@ -29,7 +29,7 @@ class TrackController(
             title = request.title,
             artist = request.artist,
             url = request.url,
-            quizzes = emptyList() // Explicitly set quizzes to empty list
+            quizzes = emptyList() 
         )
         val created = trackService.create(track, creatorId)
         logger.debug("Track created successfully: id=${created.id}, title=${created.title}, artist=${created.artist}")
@@ -65,7 +65,7 @@ class TrackController(
             title = request.title,
             artist = request.artist,
             url = request.url,
-            quizzes = emptyList() // Explicitly set quizzes to empty list
+            quizzes = emptyList()
         )
         val updated = trackService.update(id, updatedTrack, userId)
             ?: throw ResourceNotFoundException("Track not found with id: $id")

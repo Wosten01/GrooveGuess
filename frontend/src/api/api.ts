@@ -188,7 +188,6 @@ export function hasAuthToken(): boolean {
   }
 }
 
-// Функция для обновления токена
 export function refreshAuthToken(newToken: string, expiresInDays: number = 7): void {
   removeAuthToken();
   setAuthToken(newToken, expiresInDays);

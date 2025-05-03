@@ -153,18 +153,15 @@ class TrackService(
             throw IllegalAccessException("Only admins can delete tracks")
         }
         
-        // Find all quizzes that contain this track
         val track = trackRepository.findById(id)
             .orElseThrow { NoSuchElementException("Track with id $id not found") }
         
-        // Remove the track from all quizzes that reference it
         for (quiz in track.quizzes) {
             val updatedTracks = quiz.tracks.filter { it.id != id }
             val updatedQuiz = quiz.copy(tracks = updatedTracks)
             quizRepository.save(updatedQuiz)
         }
-        
-        // Now it's safe to delete the track
+
         trackRepository.deleteById(id)
         logger.debug("Track $id deleted")
     }

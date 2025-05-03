@@ -45,7 +45,6 @@ class SecurityBeansConfig {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        // Получаем фильтр JWT лениво, чтобы избежать циклической зависимости
         val jwtFilter = applicationContext.getBean(JwtAuthenticationFilter::class.java)
         
         http

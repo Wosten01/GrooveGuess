@@ -1,4 +1,3 @@
-export * from "./QuizCard"
 export * from "./QuizPlayer"
 export * from "./LoginForm"
 export * from "./FormikTextField"
