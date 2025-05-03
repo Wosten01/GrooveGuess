@@ -161,9 +161,5 @@ class QuizService(
             logger.warn("Quiz validation failed: not enough rounds")
             throw IllegalArgumentException("Quiz must have at least 2 rounds")
         }
-        // if (quiz.tracks.size < quiz.roundCount) {
-        //     logger.warn("Quiz validation failed: not enough tracks for rounds")
-        //     throw IllegalArgumentException("Quiz must have at least ${quiz.roundCount} tracks")
-        // }
     }
 }

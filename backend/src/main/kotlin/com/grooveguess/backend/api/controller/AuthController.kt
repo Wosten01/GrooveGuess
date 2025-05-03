@@ -121,11 +121,7 @@ class AuthController(
     @PostMapping("/logout")
     fun logout(response: HttpServletResponse): ResponseEntity<Any> {
         logger.debug("Logout attempt")
-        val cookie = Cookie("jwt", "")
-        cookie.maxAge = 0
-        cookie.path = "/"
-        cookie.isHttpOnly = true 
-        response.addCookie(cookie)
+        cookieUtils.clearJwtCookie(response)
         logger.debug("Logout successful")
         return ResponseEntity.ok(Message("success"))
     }

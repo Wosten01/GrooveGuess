@@ -14,7 +14,7 @@ class CookieUtils {
         val path: String = "/",
         val maxAge: Int = -1,
         val secure: Boolean = false,
-        val httpOnly: Boolean = true,
+        val httpOnly: Boolean = false,
         val sameSite: String = "Lax"
     )
     fun addCookie(
@@ -24,7 +24,7 @@ class CookieUtils {
         path: String = "/",
         maxAge: Int = -1,
         secure: Boolean = false,
-        httpOnly: Boolean = true,
+        httpOnly: Boolean = false,
         sameSite: String = "Lax"
     ) {
         val cookie = Cookie(name, value)
@@ -65,7 +65,7 @@ class CookieUtils {
         path: String = "/",
         maxAge: Int = -1,
         secure: Boolean = false,
-        httpOnly: Boolean = true,
+        httpOnly: Boolean = false,
         sameSite: String = "Lax"
     ) {
         addCookie(
@@ -78,5 +78,13 @@ class CookieUtils {
             httpOnly = httpOnly,
             sameSite = sameSite
         )
+    }
+
+    fun clearJwtCookie(response: HttpServletResponse) {
+        val cookie = Cookie("jwt", "")
+        cookie.maxAge = 0
+        cookie.path = "/"
+        cookie.isHttpOnly = false
+        response.addCookie(cookie)
     }
 }

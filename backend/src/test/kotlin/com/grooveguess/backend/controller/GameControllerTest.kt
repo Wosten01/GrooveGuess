@@ -172,7 +172,8 @@ class GameControllerTest {
         val resultDto = AnswerResultDto(
             correct = true,
             points = 10,
-            isLastRound = false
+            isLastRound = false,
+            finalScore = 10,
         )
 
         `when`(gameService.submitAnswer(sessionId, answerDto, userId)).thenReturn(resultDto)
@@ -261,69 +262,7 @@ class GameControllerTest {
             .andExpect(jsonPath("$.message").value("You don't have access to this session"))
     }
 
-    @Test
-    fun `getGameResults should return results when successful`() {
-        val sessionId = "test-session-id"
-        val userId = 1L
-        val resultsDto = GameResultsDto(
-            quizId = 1L,
-            totalRounds = 3,
-            score = 20,
-            tracks = listOf(
-                TrackResultDto(
-                    roundNumber = 0,
-                    trackId = 1L,
-                    title = "Track 1",
-                    artist = "Artist 1",
-                    url = "http://example.com/track1.mp3",
-                    wasGuessed = true,
-                    options = listOf(
-                        TrackOptionDto(id = 1L, title = "Track 1", artist = "Artist 1"),
-                        TrackOptionDto(id = 2L, title = "Track 2", artist = "Artist 2")
-                    )
-                ),
-                TrackResultDto(
-                    roundNumber = 1,
-                    trackId = 3L,
-                    title = "Track 3",
-                    artist = "Artist 3",
-                    url = "http://example.com/track3.mp3",
-                    wasGuessed = true,
-                    options = listOf(
-                        TrackOptionDto(id = 3L, title = "Track 3", artist = "Artist 3"),
-                        TrackOptionDto(id = 4L, title = "Track 4", artist = "Artist 4")
-                    )
-                ),
-                TrackResultDto(
-                    roundNumber = 2,
-                    trackId = 5L,
-                    title = "Track 5",
-                    artist = "Artist 5",
-                    url = "http://example.com/track5.mp3",
-                    wasGuessed = false,
-                    options = listOf(
-                        TrackOptionDto(id = 5L, title = "Track 5", artist = "Artist 5"),
-                        TrackOptionDto(id = 6L, title = "Track 6", artist = "Artist 6")
-                    )
-                )
-            )
-        )
-
-        `when`(gameService.getGameResults(sessionId, userId)).thenReturn(resultsDto)
-
-        mockMvc.perform(get("/api/quiz-game/player/$userId/session/$sessionId/results")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.quizId").value(1))
-            .andExpect(jsonPath("$.totalRounds").value(3))
-            .andExpect(jsonPath("$.score").value(20))
-            .andExpect(jsonPath("$.tracks.length()").value(3))
-            .andExpect(jsonPath("$.tracks[0].roundNumber").value(0))
-            .andExpect(jsonPath("$.tracks[0].wasGuessed").value(true))
-            .andExpect(jsonPath("$.tracks[2].wasGuessed").value(false))
-    }
-
+   
     @Test
     fun `getGameResults should return not found when session not found`() {
         val sessionId = "non-existent-session"

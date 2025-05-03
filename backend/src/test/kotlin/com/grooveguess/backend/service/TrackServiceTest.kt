@@ -3,6 +3,7 @@ package com.grooveguess.backend.service
 
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.repository.TrackRepository
+import com.grooveguess.backend.domain.repository.QuizRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,7 +21,8 @@ class TrackServiceTest {
     private val trackRepository: TrackRepository = mock()
     private val trackService: TrackService = mock()
     private val userService: UserService = mock()
-    private val service = TrackService(trackRepository, userService)
+    private val quizRepository: QuizRepository = mock()
+    private val service = TrackService(trackRepository, userService, quizRepository)
 
     private val sampleTrack = Track(
         id = 1L,
