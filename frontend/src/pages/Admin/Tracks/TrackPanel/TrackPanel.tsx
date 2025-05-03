@@ -314,6 +314,7 @@ export const TrackPanel = ({ onSuccess }: { onSuccess?: () => void }) => {
                         showJumpControls={false}
                         customAdditionalControls={[]}
                         style={{
+                          borderRadius: '0.75rem',
                           background: theme.palette.background.paper,
                         }}
                       />

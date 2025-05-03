@@ -21,4 +21,12 @@ interface UserRepository : JpaRepository<User, Long> {
         email: String,
         pageable: Pageable
     ): Page<User>
+
+    fun findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+        role1: Role, 
+        username: String, 
+        role2: Role, 
+        email: String, 
+        pageable: Pageable
+    ): Page<User>
 }

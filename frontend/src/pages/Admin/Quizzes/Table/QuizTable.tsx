@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Card,
@@ -10,9 +9,12 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Chip,
+  alpha,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ViewListIcon from "@mui/icons-material/ViewList";
 import { useTranslation } from "react-i18next";
 import { TranslationNamespace } from "../../../../i18n";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +22,7 @@ import { useAuth } from "../../../../hooks/auth-context";
 import { deleteQuiz, getQuizzes, Quiz } from "../../../../api/quiz-api";
 import { DialogConfirm, PaginatedTable, Table, TableActions } from "../../../../components";
 import { QuizTracksCell } from "./QuizTracksCell";
+import { motion } from "framer-motion";
 
 type TableColumn<T> = {
   label: React.ReactNode;
@@ -54,7 +57,6 @@ export const QuizTable = () => {
     setDeleteError(null);
   };
 
-  // Обработчик удаления теперь принимает refresh как аргумент
   const handleDeleteConfirm = async (refresh: () => void) => {
     if (!quizToDelete || !user?.id) return;
     setDeleting(true);
@@ -63,7 +65,7 @@ export const QuizTable = () => {
       await deleteQuiz(quizToDelete.id, user.id);
       setDeleteDialogOpen(false);
       setQuizToDelete(null);
-      refresh(); // обновляем таблицу после удаления
+      refresh();
     } catch (e: unknown) {
       if (e instanceof Error) {
         setDeleteError(e.message || t("deleteError"));
@@ -82,9 +84,55 @@ export const QuizTable = () => {
   };
 
   const columns: TableColumn<Quiz>[] = [
-    { label: t("quizTitle"), render: (row) => row.title },
-    { label: t("quizDescription"), render: (row) => row.description },
-    { label: t("quizRoundCount"), render: (row) => row.roundCount },
+    { 
+      label: t("quizTitle"), 
+      render: (row) => (
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            fontWeight: 600,
+            color: theme.palette.primary.main
+          }}
+        >
+          {row.title}
+        </Typography>
+      ) 
+    },
+    { 
+      label: t("quizDescription"), 
+      render: (row) => (
+        <Tooltip title={row.description} placement="top-start">
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              maxWidth: 250,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              color: alpha(theme.palette.text.primary, 0.8)
+            }}
+          >
+            {row.description}
+          </Typography>
+        </Tooltip>
+      ) 
+    },
+    { 
+      label: t("quizRoundCount"), 
+      align: "center",
+      render: (row) => (
+        <Chip 
+          label={row.roundCount} 
+          size="small"
+          color="primary"
+          variant="outlined"
+          sx={{ 
+            fontWeight: 600,
+            minWidth: "60px"
+          }}
+        />
+      ) 
+    },
     {
       label: t("quizTracks"),
       render: (row) => <QuizTracksCell quiz={row} />,
@@ -92,26 +140,52 @@ export const QuizTable = () => {
   ];
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <Card
         sx={{
           maxWidth: 1200,
           width: "100%",
           borderRadius: "1.5rem",
-          boxShadow: "0 8px 24px rgba(76, 175, 80, 0.10)",
+          boxShadow: `0 10px 30px ${alpha(theme.palette.primary.main, 0.1)}`,
           fontFamily: theme.typography.fontFamily,
+          overflow: "visible",
+          background: `linear-gradient(to bottom, ${alpha(theme.palette.background.paper, 0.9)}, ${theme.palette.background.paper})`,
+          backdropFilter: "blur(10px)",
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
         }}
       >
-        <CardContent>
-          <Typography
-            variant="h4"
-            align="center"
-            sx={{
-              color: theme.palette.primary.dark,
-              marginBottom: "1rem",
-            }}
-          >
-            {t("adminPanelQuizzesTitle")}
-          </Typography>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            mb: 3,
+            pb: 2,
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}`
+          }}>
+            <ViewListIcon 
+              sx={{ 
+                color: theme.palette.primary.main, 
+                fontSize: "2rem",
+                mr: 1.5 
+              }} 
+            />
+            <Typography
+              variant="h4"
+              sx={{
+                color: theme.palette.primary.main,
+                fontWeight: 700,
+                fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" }
+              }}
+            >
+              {t("adminPanelQuizzesTitle")}
+            </Typography>
+          </Box>
+          
           <PaginatedTable<Quiz>
             fetchData={getQuizzes}
             defaultRowsPerPage={10}
@@ -127,34 +201,66 @@ export const QuizTable = () => {
                 />
                 {loading ? (
                   <Box sx={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
-                    <CircularProgress />
+                    <CircularProgress size={40} thickness={4} />
                   </Box>
                 ) : error ? (
-                  <Alert severity="error">{error}</Alert>
+                  <Alert 
+                    severity="error" 
+                    variant="filled"
+                    sx={{ 
+                      borderRadius: "0.75rem",
+                      mb: 2
+                    }}
+                  >
+                    {error}
+                  </Alert>
                 ) : (
-                  <Table
-                    rows={data}
-                    columns={columns}
-                    actions={(quiz) => (
-                      <>
-                        <Tooltip title={t("editQuiz")}>
-                          <IconButton onClick={() => handleEdit(quiz)}>
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={t("deleteQuiz")}>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleDeleteClick(quiz)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-                    emptyMessage={t("noQuizzes")}
-                    pagination={pagination}
-                  />
+                  <Box sx={{ 
+                    borderRadius: "1rem", 
+                    overflow: "hidden",
+                    boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`
+                  }}>
+                    <Table
+                      rows={data}
+                      columns={columns}
+                      actions={(quiz) => (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Tooltip title={t("editQuiz")} arrow>
+                            <IconButton 
+                              onClick={() => handleEdit(quiz)}
+                              sx={{ 
+                                color: theme.palette.primary.main,
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                '&:hover': {
+                                  backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                                }
+                              }}
+                              size="small"
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t("deleteQuiz")} arrow>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleDeleteClick(quiz)}
+                              sx={{ 
+                                backgroundColor: alpha(theme.palette.error.main, 0.1),
+                                '&:hover': {
+                                  backgroundColor: alpha(theme.palette.error.main, 0.2),
+                                }
+                              }}
+                              size="small"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      )}
+                      emptyMessage={t("noQuizzes")}
+                      pagination={pagination}
+                    />
+                  </Box>
                 )}
                 <DialogConfirm
                   open={deleteDialogOpen}
@@ -174,5 +280,6 @@ export const QuizTable = () => {
           </PaginatedTable>
         </CardContent>
       </Card>
+    </motion.div>
   );
 };

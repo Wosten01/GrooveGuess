@@ -1,9 +1,12 @@
-import React from 'react';
-import { useAuth } from '../../hooks/auth-context';
-import { Alert, Box, Container, Typography, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { TranslationNamespace } from '../../i18n';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Alert, Box, Button, Container, Typography, useTheme, alpha } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { TranslationNamespace } from "../../i18n";
+import { motion } from "framer-motion";
+import LockIcon from "@mui/icons-material/Lock";
+import PersonIcon from "@mui/icons-material/Person";
+import { useAuth } from "../../hooks/auth-context";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,40 +19,141 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user } = useAuth();
   const { t } = useTranslation(TranslationNamespace.Common, { keyPrefix: 'pages.protectedRoute' });
+  const theme = useTheme();
 
   if (requireAdmin && user?.role !== 'ADMIN') {
     return (
       <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {t('accessDenied')}
-        </Alert>
-        
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h5" component="h1" gutterBottom>
-            {t('adminRequired')}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {t('adminOnlyPage')}
-          </Typography>
-        </Box>
-        
-        <Button 
-          component={Link} 
-          to="/" 
-          variant="contained" 
-          color="primary"
-          sx={{ mr: 2 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          {t('returnHome')}
-        </Button>
-        
-        <Button 
-          component={Link} 
-          to="/login" 
-          variant="outlined"
+          
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              gutterBottom
+              sx={{ 
+                fontWeight: 700,
+                color: theme.palette.error.main
+              }}
+            >
+              {t('adminRequired')}
+            </Typography>
+            <Typography 
+              variant="body1" 
+              color="text.secondary"
+              sx={{ 
+                maxWidth: "600px",
+                mx: "auto",
+                mb: 3
+              }}
+            >
+              {t('adminOnlyPage')}
+            </Typography>
+          </Box>
+          
+          <Button 
+            component={Link} 
+            to="/" 
+            variant="contained" 
+            color="primary"
+            sx={{ 
+              mr: 2,
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              fontWeight: 600
+            }}
+          >
+            {t('returnHome')}
+          </Button>
+          
+          <Button 
+            component={Link} 
+            to="/login" 
+            variant="outlined"
+            sx={{ 
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              fontWeight: 600
+            }}
+          >
+            {t('goToLogin')}
+          </Button>
+        </motion.div>
+      </Container>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          {t('goToLogin')}
-        </Button>
+          
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              gutterBottom
+              sx={{ 
+                fontWeight: 700,
+                color: theme.palette.primary.main
+              }}
+            >
+              {t('authenticationNeeded')}
+            </Typography>
+            <Typography 
+              variant="body1" 
+              color="text.secondary"
+              sx={{ 
+                maxWidth: "600px",
+                mx: "auto",
+                mb: 3
+              }}
+            >
+              {t('pleaseLoginToAccess')}
+            </Typography>
+          </Box>
+          
+          <Button 
+            component={Link} 
+            to="/" 
+            variant="contained" 
+            color="primary"
+            sx={{ 
+              mr: 2,
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              fontWeight: 600
+            }}
+          >
+            {t('returnHome')}
+          </Button>
+          
+          <Button 
+            component={Link} 
+            to="/login" 
+            variant="outlined"
+            color="primary"
+            sx={{ 
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              fontWeight: 600
+            }}
+          >
+            {t('goToLogin')}
+          </Button>
+        </motion.div>
       </Container>
     );
   }

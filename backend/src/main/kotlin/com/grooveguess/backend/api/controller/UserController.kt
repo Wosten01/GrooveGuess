@@ -25,8 +25,8 @@ class UserController(
         val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "score"))
         val role = Role.USER
         return if (!search.isNullOrBlank()) {
-            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                role, search, search, pageable
+            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+                role, search, role, search, pageable
             )
         } else {
             userRepository.findByRole(role, pageable)
