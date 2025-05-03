@@ -68,6 +68,7 @@ export const Game: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number>(TIME);
   const [maxTime, setMaxTime] = useState<number>(TIME);
   const [showPlayButton, setShowPlayButton] = useState<boolean>(false);
+  const [correctOptionId, setCorrectOptionId] = useState<number | null>(null);
 
   useEffect(() => {
     if (user !== undefined) {
@@ -106,6 +107,7 @@ export const Game: React.FC = () => {
       setShowResult(false);
       setAudioReady(false);
       setShowPlayButton(false);
+      setCorrectOptionId(null);
 
       if (audioRef.current) {
         audioRef.current.pause();
@@ -206,6 +208,18 @@ export const Game: React.FC = () => {
         setAnswerResult(result);
         setShowResult(true);
   
+        if (!result.correct && gameSession.currentRound?.options) {
+       
+          const correctOption = gameSession.currentRound.options.find(
+            opt => opt.id !== option.id
+          );
+          if (correctOption) {
+            setCorrectOptionId(correctOption.id);
+          }
+        } else {
+          setCorrectOptionId(option.id);
+        }
+  
         if (result.correct) {
           setCurrentScore(result.points);
           setTotalScore((prevScore) => prevScore + result.points);
@@ -237,7 +251,6 @@ export const Game: React.FC = () => {
           
           setGameSession((prev) => (prev ? { ...prev, completed: true } : null));
           
-          // Redirect to results page
           setTimeout(() => {
             navigate(`/game/player/${userId}/session/${sessionId}/results`);
           }, 1500);
@@ -251,7 +264,6 @@ export const Game: React.FC = () => {
     [gameSession, sessionId, showResult, user, fetchNextRound, navigate]
   );
 
-  // Timer effect
   useEffect(() => {
     if (!gameSession || !sessionId || !user || showResult || timeLeft <= 0) return;
 
@@ -347,6 +359,35 @@ export const Game: React.FC = () => {
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+  };
+
+  const getOptionBackgroundColor = (optionId: number) => {
+    if (!showResult) {
+      return selectedOption?.id === optionId ? "primary.main" : "transparent";
+    }
+    
+    if (optionId === correctOptionId) {
+      return "success.main"; 
+    }
+    
+    if (selectedOption?.id === optionId && optionId !== correctOptionId) {
+      return "error.main";
+    }
+    
+    return "transparent";
+  };
+
+ 
+  const getOptionTextColor = (optionId: number) => {
+    if (!showResult) {
+      return selectedOption?.id === optionId ? "white" : "text.primary";
+    }
+    
+    if (optionId === correctOptionId || (selectedOption?.id === optionId && optionId !== correctOptionId)) {
+      return "white"; 
+    }
+    
+    return "text.primary";
   };
 
   if (!authChecked) {
@@ -622,27 +663,20 @@ export const Game: React.FC = () => {
                             px: 2,
                             borderRadius: 3,
                             textAlign: "center",
-                            backgroundColor:
-                              selectedOption?.id === option.id
-                                ? "primary.main"
-                                : "transparent",
-                            color:
-                              selectedOption?.id === option.id
-                                ? "white"
-                                : "text.primary",
+                            backgroundColor: getOptionBackgroundColor(option.id),
+                            color: getOptionTextColor(option.id),
                             border: "1px solid",
-                            borderColor:
-                              showResult && answerResult
-                                ? option.id === selectedOption?.id
-                                  ? answerResult.correct
-                                    ? "success.main"
-                                    : "error.main"
-                                  : "primary.main"
-                                : "primary.main",
+                            borderColor: showResult
+                              ? option.id === correctOptionId
+                                ? "success.main"
+                                : option.id === selectedOption?.id
+                                ? "error.main"
+                                : "primary.main"
+                              : "primary.main",
                             boxShadow: selectedOption?.id === option.id ? 3 : 0,
                             cursor:
                               showResult || submitting ? "default" : "pointer",
-                            opacity: showResult || submitting ? 0.8 : 1,
+                            opacity: showResult || submitting ? 0.9 : 1,
                             transition: "all 0.2s ease",
                             "&:hover": {
                               backgroundColor:
@@ -658,9 +692,10 @@ export const Game: React.FC = () => {
                             sx={{
                               fontSize: "1rem",
                               fontWeight:
-                                selectedOption?.id === option.id
+                                selectedOption?.id === option.id || option.id === correctOptionId
                                   ? "medium"
                                   : "normal",
+                              color: getOptionTextColor(option.id), 
                             }}
                           >
                             {option.title} - {option.artist}

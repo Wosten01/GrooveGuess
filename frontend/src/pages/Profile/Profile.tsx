@@ -25,7 +25,11 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useAuth } from "../../hooks/auth-context";
 import axios, { AxiosError } from "axios";
-import { getRecentGames, GameStatsDto, RecentGameDto } from "../../api/game-stats-api";
+import {
+  getRecentGames,
+  GameStatsDto,
+  RecentGameDto,
+} from "../../api/game-stats-api";
 
 interface UserProfile {
   id: number;
@@ -116,7 +120,9 @@ const AdminBadge = styled(Chip)(({ theme }) => ({
 }));
 
 // Function to determine accuracy color based on percentage
-const getAccuracyColor = (accuracy: number): "success" | "info" | "warning" | "error" => {
+const getAccuracyColor = (
+  accuracy: number
+): "success" | "info" | "warning" | "error" => {
   if (accuracy >= 80) return "success";
   if (accuracy >= 60) return "info";
   if (accuracy >= 40) return "warning";
@@ -147,7 +153,7 @@ export const Profile: React.FC = () => {
 
         // Fetch user's recent games and stats using our new API
         const gamesResponse = await getRecentGames(0, 3, user.id);
-        
+
         // Create profile object with real data from API
         const userProfile: UserProfile = {
           id: user.id!,
@@ -159,7 +165,7 @@ export const Profile: React.FC = () => {
           winRate: gamesResponse.stats?.accuracy || 0,
           favoriteGenre: "Rock", // This could be fetched from another API
           recentGames: gamesResponse.games,
-          stats: gamesResponse.stats
+          stats: gamesResponse.stats,
         };
 
         setProfile(userProfile);
@@ -292,7 +298,7 @@ export const Profile: React.FC = () => {
 
                 <Chip
                   icon={<EmojiEventsIcon />}
-                  label={`Total Score: ${profile?.totalScore || 0}`}
+                  label={`Total Score: ${user?.score || 0}`}
                   color="primary"
                   sx={{ fontWeight: "bold", my: 1 }}
                 />
@@ -313,13 +319,13 @@ export const Profile: React.FC = () => {
             <Divider sx={{ my: 4 }} />
 
             <Grid container spacing={3}>
-              <Grid size={{xs:12, sm:8}}>
+              <Grid size={{ xs: 12, sm: 8 }}>
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
                   Stats Overview
                 </Typography>
 
                 <Grid container spacing={2} sx={{ mb: 4 }}>
-                  <Grid size={{xs:12, sm:4}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <StatCard>
                       <CardContent>
                         <Typography color="textSecondary" gutterBottom>
@@ -332,22 +338,28 @@ export const Profile: React.FC = () => {
                     </StatCard>
                   </Grid>
 
-                  <Grid  size={{xs:12, sm:4}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <StatCard>
                       <CardContent>
                         <Typography color="textSecondary" gutterBottom>
                           Accuracy
                         </Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <Typography 
-                            variant="h4" 
-                            component="div" 
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="h4"
+                            component="div"
                             color={getAccuracyColor(profile?.winRate || 0)}
                           >
                             {profile?.winRate || 0}%
                           </Typography>
-                          <Chip 
-                            label={getAccuracyLabel(profile?.winRate || 0)} 
+                          <Chip
+                            label={getAccuracyLabel(profile?.winRate || 0)}
                             color={getAccuracyColor(profile?.winRate || 0)}
                             size="small"
                             sx={{ mt: 1 }}
@@ -357,18 +369,6 @@ export const Profile: React.FC = () => {
                     </StatCard>
                   </Grid>
 
-                  <Grid  size={{xs:12, sm:4}}>
-                    <StatCard>
-                      <CardContent>
-                        <Typography color="textSecondary" gutterBottom>
-                          Favorite Genre
-                        </Typography>
-                        <Typography variant="h4" component="div">
-                          {profile?.favoriteGenre || "N/A"}
-                        </Typography>
-                      </CardContent>
-                    </StatCard>
-                  </Grid>
                 </Grid>
 
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -378,12 +378,18 @@ export const Profile: React.FC = () => {
                 {profile?.recentGames && profile.recentGames.length > 0 ? (
                   <Box>
                     {profile.recentGames.map((game) => {
-                      const accuracy = game.totalRounds > 0
-                        ? Math.round((game.correctAnswers / game.totalRounds) * 100)
-                        : 0;
-                      
+                      const accuracy =
+                        game.totalRounds > 0
+                          ? Math.round(
+                              (game.correctAnswers / game.totalRounds) * 100
+                            )
+                          : 0;
+
                       return (
-                        <Card key={game.sessionId} sx={{ mb: 2, borderRadius: 2 }}>
+                        <Card
+                          key={game.sessionId}
+                          sx={{ mb: 2, borderRadius: 2 }}
+                        >
                           <CardContent sx={{ py: 2 }}>
                             <Box
                               display="flex"
@@ -394,8 +400,13 @@ export const Profile: React.FC = () => {
                                 <Typography variant="h6">
                                   Quiz #{game.quizId}
                                 </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                  {new Date(game.timestamp * 1000).toLocaleDateString()}
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {new Date(
+                                    game.timestamp * 1000
+                                  ).toLocaleDateString()}
                                 </Typography>
                               </Box>
                               <Box>
@@ -406,7 +417,7 @@ export const Profile: React.FC = () => {
                                 >
                                   {game.score} pts
                                 </Typography>
-                                <Chip 
+                                <Chip
                                   label={`${accuracy}% accuracy`}
                                   size="small"
                                   color={getAccuracyColor(accuracy)}
@@ -415,11 +426,15 @@ export const Profile: React.FC = () => {
                               </Box>
                             </Box>
                           </CardContent>
-                          <CardActions sx={{ justifyContent: "flex-end", p: 1 }}>
+                          <CardActions
+                            sx={{ justifyContent: "flex-end", p: 1 }}
+                          >
                             <Button
                               size="small"
                               onClick={() =>
-                                navigate(`/game/player/${user?.id}/session/${game.sessionId}/results`)
+                                navigate(
+                                  `/game/player/${user?.id}/session/${game.sessionId}/results`
+                                )
                               }
                             >
                               View Details
@@ -461,7 +476,7 @@ export const Profile: React.FC = () => {
                 )}
               </Grid>
 
-              <Grid  size={{xs:12, md:4}} >
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Paper sx={{ p: 3, borderRadius: 3, height: "100%" }}>
                   <Typography variant="h5" fontWeight="bold" gutterBottom>
                     Actions
@@ -509,15 +524,24 @@ export const Profile: React.FC = () => {
                       <Typography variant="h6" gutterBottom>
                         Your Statistics
                       </Typography>
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
+                      >
                         <Typography variant="body2">
-                          <strong>Highest Score:</strong> {profile.stats.highestScore}
+                          <strong>Highest Score:</strong>{" "}
+                          {profile.stats.highestScore}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Average Score:</strong> {profile.stats.averageScore}
+                          <strong>Average Score:</strong>{" "}
+                          {profile.stats.averageScore}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Total Score:</strong> {profile.stats.totalScore}
+                          <strong>Total Score:</strong>{" "}
+                          {profile.stats.totalScore}
                         </Typography>
                       </Box>
                     </Box>
@@ -528,21 +552,34 @@ export const Profile: React.FC = () => {
                       Achievements
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      {profile?.stats?.totalGames && profile.stats.totalGames > 0 && (
-                        <Chip label="First Win" size="small" color="success" />
-                      )}
-                      {profile?.stats?.highestScore && profile.stats.highestScore >= 100 && (
-                        <Chip label="Century Score" size="small" color="primary" />
-                      )}
-                      {profile?.stats?.accuracy && profile.stats.accuracy >= 80 && (
-                        <Chip label="Accuracy Expert" size="small" color="success" />
-                      )}
-                      {profile?.stats?.totalGames && profile.stats.totalGames >= 5 && (
-                        <Chip label="5 Game Streak" size="small" />
-                      )}
-                      {profile?.favoriteGenre && (
-                        <Chip label={`${profile.favoriteGenre} Fan`} size="small" />
-                      )}
+                      {profile?.stats?.totalGames &&
+                        profile.stats.totalGames > 0 && (
+                          <Chip
+                            label="First Win"
+                            size="small"
+                            color="success"
+                          />
+                        )}
+                      {profile?.stats?.highestScore &&
+                        profile.stats.highestScore >= 100 && (
+                          <Chip
+                            label="Century Score"
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                      {profile?.stats?.accuracy &&
+                        profile.stats.accuracy >= 80 && (
+                          <Chip
+                            label="Accuracy Expert"
+                            size="small"
+                            color="success"
+                          />
+                        )}
+                      {profile?.stats?.totalGames &&
+                        profile.stats.totalGames >= 5 && (
+                          <Chip label="5 Game Streak" size="small" />
+                        )}
                     </Box>
                   </Box>
                 </Paper>
