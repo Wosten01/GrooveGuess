@@ -27,7 +27,7 @@ data class AnswerResultDto(
     val correct: Boolean,
     val points: Int,
     val isLastRound: Boolean,
-    val finalScore: Int = 0
+    val finalScore: Int
 )
 
 data class RoundDto(

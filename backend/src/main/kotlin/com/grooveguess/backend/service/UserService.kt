@@ -7,12 +7,16 @@ import com.grooveguess.backend.domain.dto.RegisterDTO
 import com.grooveguess.backend.domain.dto.LoginDTO
 import org.springframework.stereotype.Service
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.slf4j.LoggerFactory
+import jakarta.transaction.Transactional
 
 @Service
 class UserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
+
+    private val logger = LoggerFactory.getLogger(UserService::class.java)
 
     fun create(user: User): User = userRepository.save(user)
 
@@ -43,11 +47,27 @@ class UserService(
         }.orElse(null)
     }
 
+    @Transactional
     fun addScore(userId: Long, addedScore: Int): User? {
-        return userRepository.findById(userId).map {
-            val updatedUser = it.copy(score =+ addedScore)
-            userRepository.save(updatedUser)
-        }.orElse(null)
+        logger.debug("Adding $addedScore points to user $userId")
+        try {
+            val userOptional = userRepository.findById(userId)
+            
+            if (userOptional.isEmpty) {
+                logger.warn("User not found with ID: $userId")
+                return null
+            }
+            
+            val user = userOptional.get()
+            val newScore = user.score + addedScore
+            logger.debug("Updating score from ${user.score} to $newScore")
+            
+            val updatedUser = user.copy(score = newScore)
+            return userRepository.save(updatedUser)
+        } catch (e: Exception) {
+            logger.error("Error adding score for user $userId: ${e.message}", e)
+            throw e
+        }
     }
 
     fun delete(id: Long) {

@@ -25,6 +25,7 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useAuth } from "../../hooks/auth-context";
 import axios, { AxiosError } from "axios";
+import { getRecentGames, GameStatsDto, RecentGameDto } from "../../api/game-stats-api";
 
 interface UserProfile {
   id: number;
@@ -35,20 +36,13 @@ interface UserProfile {
   gamesPlayed: number;
   winRate: number;
   favoriteGenre?: string;
-  recentGames: RecentGame[];
+  recentGames: RecentGameDto[];
+  stats: GameStatsDto | null;
 }
 
 interface ErrorResponse {
   message: string;
   status: number;
-}
-
-interface RecentGame {
-  id: string;
-  quizId: number;
-  date: string;
-  score: number;
-  totalRounds: number;
 }
 
 const ProfilePaper = styled(Paper)(({ theme }) => ({
@@ -121,6 +115,22 @@ const AdminBadge = styled(Chip)(({ theme }) => ({
   },
 }));
 
+// Function to determine accuracy color based on percentage
+const getAccuracyColor = (accuracy: number): "success" | "info" | "warning" | "error" => {
+  if (accuracy >= 80) return "success";
+  if (accuracy >= 60) return "info";
+  if (accuracy >= 40) return "warning";
+  return "error";
+};
+
+// Function to determine accuracy label based on percentage
+const getAccuracyLabel = (accuracy: number): string => {
+  if (accuracy >= 80) return "Excellent";
+  if (accuracy >= 60) return "Good";
+  if (accuracy >= 40) return "Average";
+  return "Poor";
+};
+
 export const Profile: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -135,41 +145,24 @@ export const Profile: React.FC = () => {
       try {
         setLoading(true);
 
-        const mockProfile: UserProfile = {
+        // Fetch user's recent games and stats using our new API
+        const gamesResponse = await getRecentGames(0, 3, user.id);
+        
+        // Create profile object with real data from API
+        const userProfile: UserProfile = {
           id: user.id!,
           username: user.username || "Music Lover",
           email: user.email || "user@example.com",
           avatarUrl: user.username[0],
           totalScore: user.score,
-          gamesPlayed: 15,
-          winRate: 68,
-          favoriteGenre: "Rock",
-          recentGames: [
-            {
-              id: "game1",
-              quizId: 101,
-              date: "2023-11-15",
-              score: 120,
-              totalRounds: 10,
-            },
-            {
-              id: "game2",
-              quizId: 102,
-              date: "2023-11-12",
-              score: 95,
-              totalRounds: 10,
-            },
-            {
-              id: "game3",
-              quizId: 103,
-              date: "2023-11-08",
-              score: 150,
-              totalRounds: 10,
-            },
-          ],
+          gamesPlayed: gamesResponse.stats?.totalGames || 0,
+          winRate: gamesResponse.stats?.accuracy || 0,
+          favoriteGenre: "Rock", // This could be fetched from another API
+          recentGames: gamesResponse.games,
+          stats: gamesResponse.stats
         };
 
-        setProfile(mockProfile);
+        setProfile(userProfile);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching user profile:", err);
@@ -320,13 +313,13 @@ export const Profile: React.FC = () => {
             <Divider sx={{ my: 4 }} />
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, sm: 8 }}>
+              <Grid size={{xs:12, sm:8}}>
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
                   Stats Overview
                 </Typography>
 
                 <Grid container spacing={2} sx={{ mb: 4 }}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid size={{xs:12, sm:4}}>
                     <StatCard>
                       <CardContent>
                         <Typography color="textSecondary" gutterBottom>
@@ -339,20 +332,32 @@ export const Profile: React.FC = () => {
                     </StatCard>
                   </Grid>
 
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid  size={{xs:12, sm:4}}>
                     <StatCard>
                       <CardContent>
                         <Typography color="textSecondary" gutterBottom>
-                          Win Rate
+                          Accuracy
                         </Typography>
-                        <Typography variant="h4" component="div">
-                          {profile?.winRate || 0}%
-                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <Typography 
+                            variant="h4" 
+                            component="div" 
+                            color={getAccuracyColor(profile?.winRate || 0)}
+                          >
+                            {profile?.winRate || 0}%
+                          </Typography>
+                          <Chip 
+                            label={getAccuracyLabel(profile?.winRate || 0)} 
+                            color={getAccuracyColor(profile?.winRate || 0)}
+                            size="small"
+                            sx={{ mt: 1 }}
+                          />
+                        </Box>
                       </CardContent>
                     </StatCard>
                   </Grid>
 
-                  <Grid size={{ xs: 12, sm: 4 }}>
+                  <Grid  size={{xs:12, sm:4}}>
                     <StatCard>
                       <CardContent>
                         <Typography color="textSecondary" gutterBottom>
@@ -372,53 +377,57 @@ export const Profile: React.FC = () => {
 
                 {profile?.recentGames && profile.recentGames.length > 0 ? (
                   <Box>
-                    {profile.recentGames.map((game) => (
-                      <Card key={game.id} sx={{ mb: 2, borderRadius: 2 }}>
-                        <CardContent sx={{ py: 2 }}>
-                          <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                          >
-                            <Box>
-                              <Typography variant="h6">
-                                Quiz #{game.quizId}
-                              </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                {new Date(game.date).toLocaleDateString()}
-                              </Typography>
+                    {profile.recentGames.map((game) => {
+                      const accuracy = game.totalRounds > 0
+                        ? Math.round((game.correctAnswers / game.totalRounds) * 100)
+                        : 0;
+                      
+                      return (
+                        <Card key={game.sessionId} sx={{ mb: 2, borderRadius: 2 }}>
+                          <CardContent sx={{ py: 2 }}>
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
+                              <Box>
+                                <Typography variant="h6">
+                                  Quiz #{game.quizId}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                  {new Date(game.timestamp * 1000).toLocaleDateString()}
+                                </Typography>
+                              </Box>
+                              <Box>
+                                <Typography
+                                  variant="h6"
+                                  color="primary"
+                                  fontWeight="bold"
+                                >
+                                  {game.score} pts
+                                </Typography>
+                                <Chip 
+                                  label={`${accuracy}% accuracy`}
+                                  size="small"
+                                  color={getAccuracyColor(accuracy)}
+                                  sx={{ mt: 0.5 }}
+                                />
+                              </Box>
                             </Box>
-                            <Box>
-                              <Typography
-                                variant="h6"
-                                color="primary"
-                                fontWeight="bold"
-                              >
-                                {game.score} pts
-                              </Typography>
-                              <Typography variant="body2" align="right">
-                                {Math.round(
-                                  (game.score / (game.totalRounds * 10)) * 100
-                                )}
-                                % accuracy
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </CardContent>
-                        <CardActions sx={{ justifyContent: "flex-end", p: 1 }}>
-                          <Button
-                            size="small"
-                            onClick={() =>
-                              navigate(
-                                `/game/player/${user.id}/session/${game.id}/results`
-                              )
-                            }
-                          >
-                            View Details
-                          </Button>
-                        </CardActions>
-                      </Card>
-                    ))}
+                          </CardContent>
+                          <CardActions sx={{ justifyContent: "flex-end", p: 1 }}>
+                            <Button
+                              size="small"
+                              onClick={() =>
+                                navigate(`/game/player/${user?.id}/session/${game.sessionId}/results`)
+                              }
+                            >
+                              View Details
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      );
+                    })}
 
                     <Box sx={{ textAlign: "center", mt: 2 }}>
                       <Button
@@ -452,7 +461,7 @@ export const Profile: React.FC = () => {
                 )}
               </Grid>
 
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid  size={{xs:12, md:4}} >
                 <Paper sx={{ p: 3, borderRadius: 3, height: "100%" }}>
                   <Typography variant="h5" fontWeight="bold" gutterBottom>
                     Actions
@@ -495,20 +504,45 @@ export const Profile: React.FC = () => {
                     </ActionButton>
                   </Box>
 
+                  {profile?.stats && (
+                    <Box sx={{ mt: 4 }}>
+                      <Typography variant="h6" gutterBottom>
+                        Your Statistics
+                      </Typography>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                        <Typography variant="body2">
+                          <strong>Highest Score:</strong> {profile.stats.highestScore}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Average Score:</strong> {profile.stats.averageScore}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Total Score:</strong> {profile.stats.totalScore}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+
                   <Box sx={{ mt: 4 }}>
                     <Typography variant="h6" gutterBottom>
                       Achievements
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      <Chip label="First Win" size="small" color="success" />
-                      <Chip
-                        label="Perfect Score"
-                        size="small"
-                        color="primary"
-                      />
-                      <Chip label="5 Game Streak" size="small" />
-                      <Chip label="Rock Expert" size="small" />
-                      <Chip label="Quick Guesser" size="small" />
+                      {profile?.stats?.totalGames && profile.stats.totalGames > 0 && (
+                        <Chip label="First Win" size="small" color="success" />
+                      )}
+                      {profile?.stats?.highestScore && profile.stats.highestScore >= 100 && (
+                        <Chip label="Century Score" size="small" color="primary" />
+                      )}
+                      {profile?.stats?.accuracy && profile.stats.accuracy >= 80 && (
+                        <Chip label="Accuracy Expert" size="small" color="success" />
+                      )}
+                      {profile?.stats?.totalGames && profile.stats.totalGames >= 5 && (
+                        <Chip label="5 Game Streak" size="small" />
+                      )}
+                      {profile?.favoriteGenre && (
+                        <Chip label={`${profile.favoriteGenre} Fan`} size="small" />
+                      )}
                     </Box>
                   </Box>
                 </Paper>
