@@ -42,6 +42,9 @@ class GameServiceTest {
     
     @Mock
     private lateinit var userService: UserService
+    
+    @Mock
+    private lateinit var quizService: QuizService 
 
     @Mock
     private lateinit var valueOperations: ValueOperations<String, Any>
@@ -77,15 +80,11 @@ class GameServiceTest {
         `when`(quizRepository.findById(quizId)).thenReturn(Optional.of(quiz))
         `when`(trackRepository.findRandomTracksByQuizIdWithLimit(quizId, 6)).thenReturn(tracks)
         
-        // Create a spy of the gameService to partially mock the startGame method
         val gameServiceSpy = spy(gameService)
         
-        // When the real startGame method is called, intercept and modify the result
         doAnswer { invocation ->
-            // Call the real method
             val realResult = invocation.callRealMethod() as GameSessionDto
             
-            // If currentRound is null, create a valid RoundDto
             if (realResult.currentRound == null) {
                 val roundDto = RoundDto(
                     currentRound = 0,
@@ -96,7 +95,6 @@ class GameServiceTest {
                     )
                 )
                 
-                // Create a new GameSessionDto with the valid RoundDto
                 return@doAnswer GameSessionDto(
                     sessionId = realResult.sessionId,
                     totalRounds = realResult.totalRounds,
@@ -214,7 +212,22 @@ class GameServiceTest {
         session.wonRounds = emptyList()
         session.wonRounds += 0
         
+        val creator = User(
+            id = 1L,
+            username = "TestCreator",
+            email = "test@example.com",
+            password = "password123"
+        )
+        val quiz = Quiz(
+            id = quizId, 
+            title = "Test Quiz", 
+            description = "Test Description", 
+            creator = creator, 
+            roundCount = 3
+        )
+        
         `when`(redisTemplate.opsForValue().get(completedSessionKey)).thenReturn(session)
+        `when`(quizService.find(quizId)).thenReturn(quiz)
         
         val result = gameService.getGameResults(sessionId, userId)
         
@@ -233,7 +246,7 @@ class GameServiceTest {
         assertEquals(3L, track2.trackId)
         assertFalse(track2.wasGuessed)
     }
-    
+        
     private fun createTestTracks(count: Int): List<Track> {
         return (1..count).map { i ->
             Track(
