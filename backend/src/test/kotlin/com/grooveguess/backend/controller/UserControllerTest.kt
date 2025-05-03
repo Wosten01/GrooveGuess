@@ -42,35 +42,35 @@ class UserControllerTest {
 
     @Test
     fun `returns paginated users with search by username`() {
-        val pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "score"))
+        val pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "score"))
         whenever(
-            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                Role.USER, "ali", "ali", pageable
+            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+                Role.USER, "ali", Role.USER, "ali", pageable
             )
-        ).thenReturn(PageImpl(listOf(user1), pageable, 1))
-
-        val result = userController.getUsers(0, 10, "ali")
+        ).thenReturn(PageImpl(listOf(user1), pageable, 1))  
+    
+        val result = userController.getUsers(0, 20, "ali")
         assertEquals(1, result.content.size)
         assertEquals("alice", result.content[0].username)
-        verify(userRepository).findByRoleAndUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            Role.USER, "ali", "ali", pageable
+        verify(userRepository).findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+            Role.USER, "ali", Role.USER, "ali", pageable
         )
     }
-
+    
     @Test
     fun `returns paginated users with search by email`() {
-        val pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "score"))
+        val pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "score"))
         whenever(
-            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                Role.USER, "bob@", "bob@", pageable
+            userRepository.findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+                Role.USER, "bob@", Role.USER, "bob@", pageable
             )
-        ).thenReturn(PageImpl(listOf(user2), pageable, 1))
-
-        val result = userController.getUsers(0, 10, "bob@")
+        ).thenReturn(PageImpl(listOf(user2), pageable, 1)) 
+    
+        val result = userController.getUsers(0, 20, "bob@")
         assertEquals(1, result.content.size)
         assertEquals("bob", result.content[0].username)
-        verify(userRepository).findByRoleAndUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            Role.USER, "bob@", "bob@", pageable
+        verify(userRepository).findByRoleAndUsernameContainingIgnoreCaseOrRoleAndEmailContainingIgnoreCase(
+            Role.USER, "bob@", Role.USER, "bob@", pageable
         )
     }
 
