@@ -2,6 +2,7 @@
 package com.grooveguess.backend.service
 
 import com.grooveguess.backend.domain.model.Track
+import com.grooveguess.backend.domain.model.Quiz
 import com.grooveguess.backend.domain.repository.TrackRepository
 import com.grooveguess.backend.domain.repository.QuizRepository
 import org.junit.jupiter.api.Assertions.*
@@ -14,6 +15,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Sort
 import java.util.*
 
 class TrackServiceTest {
@@ -67,10 +69,16 @@ class TrackServiceTest {
    
     @Test
     fun `findAll returns all tracks with pagination`() {
-        val pageable = PageRequest.of(0, 2)
+        // Create a PageRequest with the same sorting as used in the service
+        val sort = Sort.by(Sort.Direction.DESC, "id")
+        val pageable = PageRequest.of(0, 2, sort)
+        
         val track1 = Track(id = 1, title = "A", artist = "B", url = "url1")
         val track2 = Track(id = 2, title = "C", artist = "D", url = "url2")
-        whenever(trackRepository.findAll(pageable)).thenReturn(PageImpl(listOf(track1, track2), pageable, 2))
+        
+        // Use doReturn().when() syntax to avoid strict stubbing issues
+        doReturn(PageImpl(listOf(track1, track2), pageable, 2))
+            .`when`(trackRepository).findAll(pageable)
 
         val result = service.findAll(0, 2)
 
@@ -126,8 +134,15 @@ class TrackServiceTest {
     @Test
     fun `delete removes track if user is admin`() {
         given(userService.isAdmin(42L)).willReturn(true)
+        
+        // Mock the track with an empty list of quizzes
+        val trackWithEmptyQuizzes = sampleTrack.copy(quizzes = emptyList())
+        given(trackRepository.findById(1L)).willReturn(Optional.of(trackWithEmptyQuizzes))
+        
         willDoNothing().given(trackRepository).deleteById(1L)
+        
         service.delete(1L, 42L)
+        
         Mockito.verify(trackRepository).deleteById(1L)
     }
 

@@ -2,21 +2,22 @@ package com.grooveguess.backend.api.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.grooveguess.backend.domain.dto.*
+import com.grooveguess.backend.exception.AccessDeniedException
+import com.grooveguess.backend.security.JwtAuthenticationFilter
 import com.grooveguess.backend.service.GameService
+import com.grooveguess.backend.service.UserService
+import com.grooveguess.backend.util.JwtUtil
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import java.util.*
-import com.grooveguess.backend.exception.AccessDeniedException
 
 @WebMvcTest(GameController::class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -27,6 +28,12 @@ class GameControllerTest {
 
     @MockitoBean
     private lateinit var gameService: GameService
+    
+    @MockitoBean
+    private lateinit var userService: UserService
+    
+    @MockitoBean
+    private lateinit var jwtUtil: JwtUtil
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -262,7 +269,6 @@ class GameControllerTest {
             .andExpect(jsonPath("$.message").value("You don't have access to this session"))
     }
 
-   
     @Test
     fun `getGameResults should return not found when session not found`() {
         val sessionId = "non-existent-session"

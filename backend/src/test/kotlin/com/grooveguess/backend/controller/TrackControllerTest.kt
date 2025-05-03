@@ -6,8 +6,11 @@ import com.grooveguess.backend.domain.dto.TrackRequest
 import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.exception.AccessDeniedException
 import com.grooveguess.backend.exception.ResourceNotFoundException
+import com.grooveguess.backend.security.JwtAuthenticationFilter
 import com.grooveguess.backend.service.AudioVerificationResult
 import com.grooveguess.backend.service.TrackService
+import com.grooveguess.backend.service.UserService
+import com.grooveguess.backend.util.JwtUtil
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.any
@@ -15,6 +18,9 @@ import org.mockito.kotlin.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
@@ -25,7 +31,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @WebMvcTest(TrackController::class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false) // Disable security filters for testing
 class TrackControllerTest {
 
     @Autowired
@@ -33,6 +39,12 @@ class TrackControllerTest {
 
     @MockitoBean
     private lateinit var trackService: TrackService
+
+    @MockitoBean
+    private lateinit var userService: UserService
+
+    @MockitoBean
+    private lateinit var jwtUtil: JwtUtil
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -118,8 +130,7 @@ class TrackControllerTest {
         `when`(trackService.findById(trackId)).thenReturn(track)
 
         mockMvc.perform(get("/api/tracks/$trackId")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                .with(csrf()))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(trackId))
             .andExpect(jsonPath("$.title").value("Test Track"))
@@ -134,8 +145,7 @@ class TrackControllerTest {
         `when`(trackService.findById(trackId)).thenThrow(ResourceNotFoundException("Track not found with id: $trackId"))
 
         mockMvc.perform(get("/api/tracks/$trackId")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                .with(csrf()))
             .andExpect(status().isNotFound)
     }
 
@@ -158,8 +168,7 @@ class TrackControllerTest {
                 .with(csrf())
                 .param("page", page.toString())
                 .param("size", size.toString())
-                .param("search", search)
-                .contentType(MediaType.APPLICATION_JSON))
+                .param("search", search))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.content.length()").value(2))
             .andExpect(jsonPath("$.content[0].id").value(1))
@@ -268,8 +277,7 @@ class TrackControllerTest {
 
         mockMvc.perform(delete("/api/tracks/$trackId")
                 .with(csrf())
-                .param("userId", userId.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .param("userId", userId.toString()))
             .andExpect(status().isNoContent)
     }
 
@@ -282,8 +290,7 @@ class TrackControllerTest {
 
         mockMvc.perform(delete("/api/tracks/$trackId")
                 .with(csrf())
-                .param("userId", userId.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .param("userId", userId.toString()))
             .andExpect(status().isForbidden)
     }
 
@@ -300,8 +307,7 @@ class TrackControllerTest {
 
         mockMvc.perform(get("/api/tracks/validate-audio")
                 .with(csrf())
-                .param("url", url)
-                .contentType(MediaType.APPLICATION_JSON))
+                .param("url", url))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.isValid").value(true))
             .andExpect(jsonPath("$.mimeType").value("audio/mpeg"))
@@ -321,8 +327,7 @@ class TrackControllerTest {
 
         mockMvc.perform(get("/api/tracks/validate-audio")
                 .with(csrf())
-                .param("url", url)
-                .contentType(MediaType.APPLICATION_JSON))
+                .param("url", url))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.isValid").value(false))
             .andExpect(jsonPath("$.mimeType").doesNotExist())
