@@ -22,7 +22,12 @@ import { TranslationNamespace } from "../../../../i18n";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../hooks/auth-context";
 import { deleteTrack, getTracks, Track } from "../../../../api/tracks-api";
-import { DialogConfirm, PaginatedTable, Table, TableActions } from "../../../../components";
+import {
+  DialogConfirm,
+  PaginatedTable,
+  Table,
+  TableActions,
+} from "../../../../components";
 
 type TableColumn<T> = {
   label: React.ReactNode;
@@ -104,23 +109,14 @@ export const TrackTable = () => {
     },
   ];
 
-  const fetchData = (page: number, size: number) => getTracks(page, size, search);
+  const fetchData = (page: number, size: number) =>
+    getTracks(page, size, search);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${theme.palette.accent.light} 0%, ${theme.palette.pastel.main} 100%)`,
-        padding: "2rem",
-        fontFamily: theme.typography.fontFamily,
-      }}
-    >
+    <>
       <Card
         sx={{
-          maxWidth: 1200,
+          maxWidth: 1300,
           width: "100%",
           borderRadius: "1.5rem",
           boxShadow: "0 8px 24px rgba(76, 175, 80, 0.10)",
@@ -145,22 +141,19 @@ export const TrackTable = () => {
               placeholder={t("searchTracks")}
               size="small"
               sx={{ width: 320 }}
-              slotProps = {{
-                input:{
+              slotProps={{
+                input: {
                   startAdornment: (
                     <InputAdornment position="start">
                       <SearchIcon color="action" />
                     </InputAdornment>
                   ),
-                }
+                },
               }}
               variant="outlined"
             />
           </Box>
-          <PaginatedTable<Track>
-            fetchData={fetchData}
-            defaultRowsPerPage={10}
-          >
+          <PaginatedTable<Track> fetchData={fetchData} defaultRowsPerPage={10}>
             {({ data, loading, error, pagination, refresh }) => (
               <>
                 <TableActions
@@ -171,7 +164,13 @@ export const TrackTable = () => {
                   refreshLabel={t("refresh")}
                 />
                 {loading ? (
-                  <Box sx={{ display: "flex", justifyContent: "center", margin: "2rem 0" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      margin: "2rem 0",
+                    }}
+                  >
                     <CircularProgress />
                   </Box>
                 ) : error ? (
@@ -188,7 +187,10 @@ export const TrackTable = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={t("deleteTrack")}>
-                          <IconButton color="error" onClick={() => handleDeleteClick(track)}>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDeleteClick(track)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         </Tooltip>
@@ -216,6 +218,6 @@ export const TrackTable = () => {
         dialogText={t("deleteTrackConfirm")}
         confirmColor="error"
       />
-    </div>
+    </>
   );
 };

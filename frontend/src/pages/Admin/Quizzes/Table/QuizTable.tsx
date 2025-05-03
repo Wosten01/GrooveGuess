@@ -92,17 +92,6 @@ export const QuizTable = () => {
   ];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${theme.palette.accent.light} 0%, ${theme.palette.pastel.main} 100%)`,
-        padding: "2rem",
-        fontFamily: theme.typography.fontFamily,
-      }}
-    >
       <Card
         sx={{
           maxWidth: 1200,
@@ -185,6 +174,5 @@ export const QuizTable = () => {
           </PaginatedTable>
         </CardContent>
       </Card>
-    </div>
   );
 };

@@ -1,39 +1,53 @@
-import { Box, IconButton, Paper, styled } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Box, IconButton, Paper } from "@mui/material";
 import { motion } from "framer-motion";
 
-export const StyledPaper = styled(Paper)({
-    padding: "32px",
-    borderRadius: 16,
+export const StyledPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(4),
+    borderRadius: theme.spacing(2),
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-    background: "rgba(255, 255, 255, 0.95)",
+    background: theme.palette.background.paper,
     backdropFilter: "blur(8px)",
     transition: "all 0.3s ease",
+    position: "relative",
     overflow: "hidden",
-  });
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: "8px",
+      background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+    },
+  }));
   
-  export  const OptionButton = styled(motion.div)({
+  export const OptionButton = styled(motion.div)(({ theme }) => ({
     width: "100%",
-    borderRadius: 12,
+    borderRadius: theme.spacing(1.5),
     overflow: "hidden",
     transition: "all 0.2s ease",
     cursor: "pointer",
-  });
+  }));
   
-  export const ScoreDisplay = styled(Box)({
+  export const ScoreDisplay = styled(Box)(({ theme }) => ({
     display: "flex",
-    justifyContent: "space-between",
-    marginTop: "32px",
-    padding: "16px",
-    borderRadius: 8,
-    background: "rgba(0, 0, 0, 0.03)",
-  });
+    justifyContent: "center",
+    marginTop: theme.spacing(4),
+    padding: theme.spacing(1),
+    borderRadius: theme.spacing(1),
+    background: theme.palette.background.default,
+  }));
   
- export const AudioControlButton = styled(IconButton)({
+ export const AudioControlButton = styled(IconButton)(({ theme }) => ({
     position: "absolute",
-    top: "16px",
-    right: "16px",
-    background: "rgba(0, 0, 0, 0.05)",
+    top: theme.spacing(2),
+    right: theme.spacing(2),
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    width: "48px",
+    height: "48px",
     "&:hover": {
-      background: "rgba(0, 0, 0, 0.1)",
+      backgroundColor: theme.palette.primary.dark,
     },
-  });
+  }));

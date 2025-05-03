@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./theme";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import PageBackground from "./components/PageBackground/PageBackground";
 import {
   WelcomePage,
   LoginPage,
@@ -27,7 +28,8 @@ function App() {
         <BrowserRouter>
           <AppBar />
           <Toolbar />
-          <Routes>
+          <PageBackground>
+            <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
@@ -118,7 +120,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
-          </Routes>
+            </Routes>
+          </PageBackground>
         </BrowserRouter>
       </ThemeProvider>
     </AuthProvider>

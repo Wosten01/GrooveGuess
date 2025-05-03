@@ -14,13 +14,17 @@ import {
   TableRow,
   Divider,
   Alert,
-  Chip
+  Chip,
+  Container,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { AxiosError } from 'axios';
 import { getGameResults, GameResultsDto, TrackOptionDto } from '../../api/quiz-game-api';
 import { useAuth } from '../../hooks/auth-context';
 import { useTranslation } from 'react-i18next';
 import { TranslationNamespace } from '../../i18n';
+import { motion } from 'framer-motion';
 
 interface ErrorResponse {
   message: string;
@@ -31,6 +35,8 @@ export const GameResults: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,19 +97,19 @@ export const GameResults: React.FC = () => {
 
   if (!authChecked) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Container maxWidth="lg" sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
         <CircularProgress />
         <Typography variant="body1" sx={{ ml: 2 }}>
           {t('checkingAuth')}
         </Typography>
-      </Box>
+      </Container>
     );
   }
 
   if (authChecked && !user) {
     return (
-      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="80vh">
-        <Alert severity="warning" sx={{ mb: 2 }}>
+      <Container maxWidth="lg" sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
+        <Alert severity="warning" sx={{ mb: 2, width: { xs: '100%', sm: '80%', md: '60%' } }}>
           {t('loginRequired')}
         </Alert>
         <Button 
@@ -113,23 +119,23 @@ export const GameResults: React.FC = () => {
         >
           {t('loginButton')}
         </Button>
-      </Box>
+      </Container>
     );
   }
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Container maxWidth="lg" sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
         <CircularProgress />
-      </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Container maxWidth="lg" sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
         <Typography color="error" variant="h6">{error}</Typography>
-      </Box>
+      </Container>
     );
   }
 
@@ -145,7 +151,7 @@ export const GameResults: React.FC = () => {
 
   const TrackDisplay = ({ title, artist }: { title: string, artist: string }) => (
     <>
-      <Typography variant="body2">{title}</Typography>
+      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>{title}</Typography>
       <Typography variant="caption" color="textSecondary">
         {t('by')} {artist}
       </Typography>
@@ -153,64 +159,170 @@ export const GameResults: React.FC = () => {
   );
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {results && (
-        <>
-          <Paper elevation={3} sx={{ p: 3, mb: 3, textAlign: 'center' }}>
-            <Typography variant="h4" gutterBottom>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              p: { xs: 2, sm: 3, md: 4 }, 
+              mb: 4, 
+              textAlign: 'center',
+              borderRadius: 2,
+              background: `linear-gradient(to bottom, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <Typography 
+              variant="h4" 
+              gutterBottom
+              sx={{ 
+                fontWeight: 'bold',
+                color: theme.palette.primary.main,
+                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' }
+              }}
+            >
               {t('title')}
             </Typography>
-            <Typography variant="h5" gutterBottom>
-               {results.quizTitle}
+            <Typography 
+              variant="h5" 
+              gutterBottom
+              sx={{ 
+                color: theme.palette.text.primary,
+                mb: 3,
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' }
+              }}
+            >
+              {results.quizTitle}
             </Typography>
             
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, my: 3 }}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h3" color="primary">
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row',
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: isMobile ? 3 : 4, 
+                my: 3 
+              }}
+            >
+              <Box 
+                sx={{ 
+                  textAlign: 'center',
+                  background: 'rgba(76, 175, 80, 0.05)',
+                  borderRadius: 2,
+                  p: 2,
+                  minWidth: { sm: '150px', md: '180px' },
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                  border: '1px solid rgba(76, 175, 80, 0.2)'
+                }}
+              >
+                <Typography 
+                  variant="h3" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                  }}
+                >
                   {results.score}
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                   {t('finalScore')}
                 </Typography>
               </Box>
               
-              <Divider orientation="vertical" flexItem />
+              {!isMobile && <Divider orientation="vertical" flexItem />}
               
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h3" color="primary">
+              <Box 
+                sx={{ 
+                  textAlign: 'center',
+                  background: 'rgba(33, 150, 243, 0.05)',
+                  borderRadius: 2,
+                  p: 2,
+                  minWidth: { sm: '150px', md: '180px' },
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                  border: '1px solid rgba(33, 150, 243, 0.2)'
+                }}
+              >
+                <Typography 
+                  variant="h3" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                  }}
+                >
                   {stats.accuracy}%
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                   {t('accuracy')}
                 </Typography>
               </Box>
               
-              <Divider orientation="vertical" flexItem />
+              {!isMobile && <Divider orientation="vertical" flexItem />}
               
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h3" color="primary">
+              <Box 
+                sx={{ 
+                  textAlign: 'center',
+                  background: 'rgba(156, 39, 176, 0.05)',
+                  borderRadius: 2,
+                  p: 2,
+                  minWidth: { sm: '150px', md: '180px' },
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                  border: '1px solid rgba(156, 39, 176, 0.2)'
+                }}
+              >
+                <Typography 
+                  variant="h3" 
+                  color="primary"
+                  sx={{ 
+                    fontWeight: 'bold',
+                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                  }}
+                >
                   {stats.correctAnswers}/{results.totalRounds}
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                   {t('correctAnswers')}
                 </Typography>
               </Box>
             </Box>
           </Paper>
           
-          <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h5" gutterBottom>
+          <Paper 
+            elevation={3} 
+            sx={{ 
+              p: { xs: 2, sm: 3, md: 4 }, 
+              mb: 4,
+              borderRadius: 2,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              gutterBottom
+              sx={{ 
+                fontWeight: 'bold',
+                color: theme.palette.primary.main,
+                mb: 3
+              }}
+            >
               {t('roundDetails')}
             </Typography>
             
-            <TableContainer>
+            <TableContainer sx={{ borderRadius: 1, overflow: 'hidden' }}>
               <Table>
                 <TableHead>
-                  <TableRow>
-                    <TableCell>{t('round')}</TableCell>
-                    <TableCell>{t('correctTrack')}</TableCell>
-                    <TableCell>{t('yourAnswer')}</TableCell>
-                    <TableCell>{t('result')}</TableCell>
+                  <TableRow sx={{ backgroundColor: 'rgba(0, 0, 0, 0.03)' }}>
+                    <TableCell sx={{ fontWeight: 'bold', width: '10%' }}>{t('round')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '35%' }}>{t('correctTrack')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '35%' }}>{t('yourAnswer')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>{t('result')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -221,10 +333,17 @@ export const GameResults: React.FC = () => {
                       <TableRow 
                         key={track.roundNumber}
                         sx={{ 
-                          backgroundColor: track.wasGuessed ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)'
+                          backgroundColor: track.wasGuessed 
+                            ? 'rgba(76, 175, 80, 0.1)' 
+                            : 'rgba(244, 67, 54, 0.1)',
+                          '&:hover': {
+                            backgroundColor: track.wasGuessed 
+                              ? 'rgba(76, 175, 80, 0.15)' 
+                              : 'rgba(244, 67, 54, 0.15)',
+                          }
                         }}
                       >
-                        <TableCell>{track.roundNumber + 1}</TableCell>
+                        <TableCell sx={{ fontWeight: 'medium', fontSize: '1rem' }}>{track.roundNumber + 1}</TableCell>
                         <TableCell>
                           <TrackDisplay title={track.title} artist={track.artist} />
                         </TableCell>
@@ -232,14 +351,26 @@ export const GameResults: React.FC = () => {
                           {userAnswerOption ? (
                             <TrackDisplay title={userAnswerOption.title} artist={userAnswerOption.artist} />
                           ) : (
-                            <Typography variant="body2" color="text.secondary">{t('noAnswer')}</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                              {t('noAnswer')}
+                            </Typography>
                           )}
                         </TableCell>
                         <TableCell>
                           {track.wasGuessed ? (
-                            <Chip label={t('correct')} color="success" size="small" />
+                            <Chip 
+                              label={t('correct')} 
+                              color="success" 
+                              size="small" 
+                              sx={{ fontWeight: 'bold', px: 1 }}
+                            />
                           ) : (
-                            <Chip label={t('incorrect')} color="error" size="small" />
+                            <Chip 
+                              label={t('incorrect')} 
+                              color="error" 
+                              size="small" 
+                              sx={{ fontWeight: 'bold', px: 1 }}
+                            />
                           )}
                         </TableCell>
                       </TableRow>
@@ -250,12 +381,23 @@ export const GameResults: React.FC = () => {
             </TableContainer>
           </Paper>
           
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Button 
               variant="contained" 
               color="primary" 
               size="large"
               onClick={handlePlayAgain}
+              sx={{ 
+                px: 4, 
+                py: 1.5, 
+                borderRadius: 2,
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)',
+                '&:hover': {
+                  boxShadow: '0 6px 16px rgba(76, 175, 80, 0.3)',
+                }
+              }}
             >
               {t('playAgain')}
             </Button>
@@ -264,12 +406,19 @@ export const GameResults: React.FC = () => {
               color="primary" 
               size="large"
               onClick={handleViewScoreboard}
+              sx={{ 
+                px: 4, 
+                py: 1.5, 
+                borderRadius: 2,
+                fontWeight: 'bold',
+                fontSize: '1rem'
+              }}
             >
               {t('viewScoreboard')}
             </Button>
           </Box>
-        </>
+        </motion.div>
       )}
-    </Box>
+    </Container>
   );
 };

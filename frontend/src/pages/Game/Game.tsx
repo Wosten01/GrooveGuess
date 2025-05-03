@@ -32,8 +32,8 @@ import {
   ScoreDisplay,
   StyledPaper,
 } from "./GameStyledComponents";
-import { TranslationNamespace } from "../../i18n";
 import { useTranslation } from "react-i18next";
+import { TranslationNamespace } from "../../i18n";
 
 interface AnswerResult {
   correct: boolean;
@@ -187,7 +187,8 @@ export const Game: React.FC = () => {
 
   const handleOptionSelect = useCallback(
     async (option: { id: number; title: string }) => {
-      if (showResult || !gameSession || !sessionId || !user) return;
+      if (showResult || !gameSession || !sessionId || !user || timeLeft <= 0)
+        return;
 
       setSelectedOption(option);
       setSubmitting(true);
@@ -255,7 +256,16 @@ export const Game: React.FC = () => {
         setSubmitting(false);
       }
     },
-    [gameSession, sessionId, showResult, user, fetchNextRound, navigate, t]
+    [
+      gameSession,
+      sessionId,
+      showResult,
+      user,
+      fetchNextRound,
+      navigate,
+      t,
+      timeLeft,
+    ]
   );
 
   useEffect(() => {
@@ -501,6 +511,7 @@ export const Game: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        width: "100%",
       }}
     >
       <Snackbar
@@ -649,14 +660,20 @@ export const Game: React.FC = () => {
               <Grid container spacing={2}>
                 {gameSession.currentRound.options &&
                   gameSession.currentRound.options.map((option, index) => (
-                    <Grid
-                      size={{ xs: 12, sm: 6 }}
-                      key={option.id}
-                      sx={{ display: "flex" }}
-                    >
+                    <Grid size={{ xs: 12, sm: 6 }} key={option.id}>
                       <OptionButton
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{
+                          scale:
+                            timeLeft > 0 && !showResult && !submitting
+                              ? 1.02
+                              : 1,
+                        }}
+                        whileTap={{
+                          scale:
+                            timeLeft > 0 && !showResult && !submitting
+                              ? 0.98
+                              : 1,
+                        }}
                         animate={{
                           opacity: [0, 1],
                           y: [20, 0],
@@ -666,11 +683,19 @@ export const Game: React.FC = () => {
                           duration: 0.3,
                         }}
                         onClick={() =>
+                          timeLeft > 0 &&
                           !showResult &&
                           !submitting &&
                           handleOptionSelect(option)
                         }
-                        style={{ width: "100%", height: "100%" }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          cursor:
+                            timeLeft > 0 && !showResult && !submitting
+                              ? "pointer"
+                              : "default",
+                        }}
                       >
                         <Box
                           sx={{
@@ -692,8 +717,13 @@ export const Game: React.FC = () => {
                               : "primary.main",
                             boxShadow: selectedOption?.id === option.id ? 3 : 0,
                             cursor:
-                              showResult || submitting ? "default" : "pointer",
-                            opacity: showResult || submitting ? 0.9 : 1,
+                              timeLeft > 0 && !showResult && !submitting
+                                ? "pointer"
+                                : "default",
+                            opacity:
+                              timeLeft <= 0 || showResult || submitting
+                                ? 0.7
+                                : 1,
                             transition: "all 0.2s ease",
                             height: "100%",
                             display: "flex",
@@ -701,7 +731,7 @@ export const Game: React.FC = () => {
                             justifyContent: "center",
                             "&:hover": {
                               backgroundColor:
-                                !showResult && !submitting
+                                timeLeft > 0 && !showResult && !submitting
                                   ? selectedOption?.id === option.id
                                     ? "primary.dark"
                                     : "rgba(0, 0, 0, 0.04)"
@@ -735,11 +765,42 @@ export const Game: React.FC = () => {
               )}
 
               <ScoreDisplay>
-                <Box sx={{ textAlign: "right" }}>
-                  <Typography variant="body2" color="textSecondary">
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                    background:
+                      "linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%)",
+                    borderRadius: 3,
+                    padding: 2,
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                    border: "1px solid rgba(76, 175, 80, 0.3)",
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: "1rem",
+                      mb: 0.5,
+                    }}
+                  >
                     {t("totalScore")}
                   </Typography>
-                  <Typography variant="h6">{totalScore}</Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: "bold",
+                      color: "primary.main",
+                      textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      fontSize: { xs: "2rem", sm: "2.5rem" },
+                    }}
+                  >
+                    {totalScore}
+                  </Typography>
                 </Box>
               </ScoreDisplay>
             </Box>

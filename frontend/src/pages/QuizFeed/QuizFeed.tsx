@@ -75,39 +75,48 @@ export const QuizCard: React.FC<{ quiz: Quiz; index: number }> = ({
           overflow: "visible",
         }}
       >
-        <CardContent sx={{ flexGrow: 1 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: theme.palette.primary.dark,
-              fontWeight: 700,
-              mb: 2,
-              fontSize: { xs: "1.3rem", sm: "1.7rem", md: "2.1rem" },
-              lineHeight: 1.2,
-            }}
-          >
-            {quiz.title}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: theme.palette.secondary.dark,
-              mb: 3,
-              fontSize: { xs: "1rem", sm: "1.1rem", md: "1.15rem" },
-              minHeight: 60,
-            }}
-          >
-            {quiz.description}
-          </Typography>
+        <CardContent 
+          sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            flexGrow: 1,
+            height: "100%",
+            pb: 2 
+          }}
+        >
+          <Box sx={{ mb: 'auto' }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: theme.palette.primary.dark,
+                fontWeight: 700,
+                mb: 2,
+                fontSize: { xs: "1.3rem", sm: "1.7rem", md: "2.1rem" },
+                lineHeight: 1.2,
+              }}
+            >
+              {quiz.title}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: theme.palette.secondary.dark,
+                mb: 3,
+                fontSize: { xs: "1rem", sm: "1.1rem", md: "1.15rem" },
+              }}
+            >
+              {quiz.description}
+            </Typography>
+          </Box>
+          
           <Box
             sx={{
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
               width: "100%",
-              mt: "auto",
-              opacity: 0.8,
-              gap: 1,
+              mt: 2,
+              pt: 1,
             }}
           >
             <Typography

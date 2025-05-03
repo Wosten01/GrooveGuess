@@ -1,4 +1,3 @@
-
 import {
   Card,
   CardContent,
@@ -75,21 +74,10 @@ export const Scoreboard = () => {
     getScoreboardUsers(page, size, search);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: (theme) =>
-          `linear-gradient(135deg, ${theme.palette.accent.light} 0%, ${theme.palette.pastel.main} 100%)`,
-        padding: "2rem",
-        fontFamily: (theme) => theme.typography.fontFamily,
-      }}
-    >
+    <>
       <Card
         sx={{
-          maxWidth: 700,
+          maxWidth: 1200,
           width: "100%",
           borderRadius: "1.5rem",
           boxShadow: "0 8px 24px rgba(76, 175, 80, 0.10)",
@@ -124,10 +112,7 @@ export const Scoreboard = () => {
               variant="outlined"
             />
           </Box>
-          <PaginatedTable<User>
-            fetchData={fetchData}
-            defaultRowsPerPage={10}
-          >
+          <PaginatedTable<User> fetchData={fetchData} defaultRowsPerPage={10}>
             {({ data, loading, error, pagination, page, rowsPerPage }) => (
               <>
                 {loading ? (
@@ -187,7 +172,7 @@ export const Scoreboard = () => {
           </PaginatedTable>
         </CardContent>
       </Card>
-    </Box>
+    </>
   );
 };
 
