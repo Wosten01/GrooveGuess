@@ -39,6 +39,12 @@ export type TrackOptionDto = {
   artist: string;
 };
 
+export type UserAnswerDto = {
+  roundNumber: number;
+  selectedOptionId: number;
+  isCorrect: boolean;
+};
+
 
 export type TrackResultDto = {
   roundNumber: number;
@@ -48,6 +54,7 @@ export type TrackResultDto = {
   url: string;
   wasGuessed: boolean;
   options: TrackOptionDto[];
+  userAnswer?: UserAnswerDto;
 };
 
 export type GameResultsDto = {
@@ -55,6 +62,7 @@ export type GameResultsDto = {
   totalRounds: number;
   score: number;
   tracks: TrackResultDto[];
+  userAnswers: UserAnswerDto[];
 };
 
 

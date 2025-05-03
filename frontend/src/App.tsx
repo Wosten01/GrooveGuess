@@ -12,13 +12,14 @@ import {
   QuizTable,
   Game,
   GameResults,
+  GameStats,
+  Profile,
+  Scoreboard,
 } from "./pages";
 import { AppBar } from "./components";
 import { AuthProvider } from "./context/AuthContext";
 import { Toolbar } from "@mui/material";
-import { Scoreboard } from "./pages/Scoreboard";
 import { QuizFeed } from "./pages"; 
-import { Profile } from "./pages/Profile/Profile";
 
 
 function App() {
@@ -61,6 +62,8 @@ function App() {
             </Route>
             <Route path="/scoreboard" element={<Scoreboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/results" element={<GameStats />} />
+            
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

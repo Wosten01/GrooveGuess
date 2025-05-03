@@ -36,6 +36,20 @@ class UserService(
         }.orElse(null)
     }
 
+    fun setScore(userId: Long, score: Int): User? {
+        return userRepository.findById(userId).map {
+            val updatedUser = it.copy(score = score)
+            userRepository.save(updatedUser)
+        }.orElse(null)
+    }
+
+    fun addScore(userId: Long, addedScore: Int): User? {
+        return userRepository.findById(userId).map {
+            val updatedUser = it.copy(score =+ addedScore)
+            userRepository.save(updatedUser)
+        }.orElse(null)
+    }
+
     fun delete(id: Long) {
         userRepository.deleteById(id)
     }

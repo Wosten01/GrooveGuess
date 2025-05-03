@@ -27,7 +27,8 @@ class GameService(
     private val quizRepository: QuizRepository,
     private val trackRepository: TrackRepository,
     private val redisTemplate: RedisTemplate<String, Any>,
-    private val redisUtils: RedisUtils
+    private val redisUtils: RedisUtils,
+    private val userService: UserService,
 ) {
     private val logger = LoggerFactory.getLogger(GameService::class.java)
 
@@ -192,12 +193,23 @@ class GameService(
             session.score += points
             session.wonRounds += roundIndex
         }
+
+        val userAnswer = UserAnswerDto(
+            roundNumber = answer.roundNumber,
+            selectedOptionId = answer.optionId,
+            isCorrect = isCorrect
+        )
+
         session.rounds[roundIndex].checked = true
+
+        session.userAnswers += (userAnswer)
 
         val isLastRound = session.currentRound >= session.rounds.size - 1
         
         if (isLastRound) {
             completeGame(session)
+            userService.addScore(userId, session.score)
+            
         } else {
             updateSession(session)
         }
@@ -269,9 +281,12 @@ class GameService(
             completeGame(session)
         }
 
+        val userAnswersMap = session.userAnswers.associateBy { it.roundNumber }
+
         val trackResults = session.rounds.mapIndexed { _, round ->
             val roundNumber = round.roundNumber
             val wasGuessed = session.wonRounds.contains(roundNumber)
+            val userAnswer = userAnswersMap[roundNumber]
             
             TrackResultDto(
                 roundNumber = roundNumber,
@@ -280,7 +295,8 @@ class GameService(
                 artist = round.options.find { it.id == round.correctTrackId }?.artist ?: "Unknown",
                 url = round.url,
                 wasGuessed = wasGuessed,
-                options = round.options
+                options = round.options,
+                userAnswer = userAnswer
             )
         }
         
@@ -288,7 +304,8 @@ class GameService(
             quizId = session.quizId,
             totalRounds = session.rounds.size,
             score = session.score,
-            tracks = trackResults
+            tracks = trackResults,
+            userAnswers = session.userAnswers
         )
     }
 

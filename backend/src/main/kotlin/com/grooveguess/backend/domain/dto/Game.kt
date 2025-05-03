@@ -36,11 +36,18 @@ data class RoundDto(
     val options: List<TrackOptionDto>
 )
 
+data class UserAnswerDto(
+    val roundNumber: Int,
+    val selectedOptionId: Long,
+    val isCorrect: Boolean
+)
+
 data class GameResultsDto(
     val quizId: Long,
     val totalRounds: Int,
     val score: Int,
-    val tracks: List<TrackResultDto>
+    val tracks: List<TrackResultDto>,
+    var userAnswers: List<UserAnswerDto>,
 )
 
 data class TrackResultDto(
@@ -50,5 +57,6 @@ data class TrackResultDto(
     val artist: String,
     val url: String,
     val wasGuessed: Boolean,
-    val options: List<TrackOptionDto>
+    val options: List<TrackOptionDto>,
+    val userAnswer: UserAnswerDto? = null,
 )

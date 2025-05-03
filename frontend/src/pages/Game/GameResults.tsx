@@ -13,10 +13,11 @@ import {
   TableHead, 
   TableRow,
   Divider,
-  Alert
+  Alert,
+  Chip
 } from '@mui/material';
 import { AxiosError } from 'axios';
-import { getGameResults, GameResultsDto } from '../../api/quiz-game-api';
+import { getGameResults, GameResultsDto, TrackOptionDto } from '../../api/quiz-game-api';
 import { useAuth } from '../../hooks/auth-context';
 
 interface ErrorResponse {
@@ -33,15 +34,12 @@ export const GameResults: React.FC = () => {
   const [results, setResults] = useState<GameResultsDto | null>(null);
   const [authChecked, setAuthChecked] = useState<boolean>(false);
 
-  // Check if user is authenticated
   useEffect(() => {
-    // If user data is available (either logged in or definitely not logged in)
     if (user !== undefined) {
       setAuthChecked(true);
     }
   }, [user]);
 
-  // Fetch results once authentication is checked
   useEffect(() => {
     const fetchResults = async () => {
       if (!sessionId || !user) return;
@@ -54,7 +52,6 @@ export const GameResults: React.FC = () => {
       } catch (err) {
         console.error('Error fetching game results:', err);
         
-        // Type-safe error handling
         const axiosError = err as AxiosError<ErrorResponse>;
         const errorMessage = axiosError.response?.data?.message || 
                             axiosError.message || 
@@ -78,7 +75,6 @@ export const GameResults: React.FC = () => {
     navigate('/scoreboard');
   };
 
-  // Calculate statistics
   const calculateStats = () => {
     if (!results) return { correctAnswers: 0, accuracy: 0 };
     
@@ -90,7 +86,6 @@ export const GameResults: React.FC = () => {
     return { correctAnswers, accuracy };
   };
 
-  // Show loading while checking authentication
   if (!authChecked) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -102,7 +97,6 @@ export const GameResults: React.FC = () => {
     );
   }
 
-  // Show login prompt if not authenticated
   if (authChecked && !user) {
     return (
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -137,6 +131,21 @@ export const GameResults: React.FC = () => {
   }
 
   const stats = calculateStats();
+
+  const getUserAnswerOption = (track: any): TrackOptionDto | null => {
+    if (!track.userAnswer) return null;
+    
+    return track.options.find(
+      (option: TrackOptionDto) => option.id === track.userAnswer.selectedOptionId
+    ) || null;
+  };
+
+  const TrackDisplay = ({ title, artist }: { title: string, artist: string }) => (
+    <>
+      <Typography variant="body2">{title}</Typography>
+      <Typography variant="caption" color="textSecondary">by {artist}</Typography>
+    </>
+  );
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
@@ -194,14 +203,14 @@ export const GameResults: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Round</TableCell>
-                    <TableCell>Track</TableCell>
-                    <TableCell>Artist</TableCell>
+                    <TableCell>Correct Track</TableCell>
                     <TableCell>Your Answer</TableCell>
+                    <TableCell>Result</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {results.tracks.map((track) => {
-                    const userAnswer = "Unknown"; 
+                    const userAnswerOption = getUserAnswerOption(track);
                     
                     return (
                       <TableRow 
@@ -212,12 +221,22 @@ export const GameResults: React.FC = () => {
                       >
                         <TableCell>{track.roundNumber + 1}</TableCell>
                         <TableCell>
-                          <Typography variant="body2">{track.title}</Typography>
-                          <Typography variant="caption" color="textSecondary">{track.artist}</Typography>
+                          <TrackDisplay title={track.title} artist={track.artist} />
                         </TableCell>
-                        <TableCell>{track.artist}</TableCell>
-                        {/* TODO: Add Answer Stats */}
-                        <TableCell>{userAnswer}</TableCell>
+                        <TableCell>
+                          {userAnswerOption ? (
+                            <TrackDisplay title={userAnswerOption.title} artist={userAnswerOption.artist} />
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">No answer</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {track.wasGuessed ? (
+                            <Chip label="Correct" color="success" size="small" />
+                          ) : (
+                            <Chip label="Incorrect" color="error" size="small" />
+                          )}
+                        </TableCell>
                       </TableRow>
                     );
                   })}

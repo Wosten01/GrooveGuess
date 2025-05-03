@@ -2,6 +2,7 @@
 package com.grooveguess.backend.domain.model
 
 import com.grooveguess.backend.domain.dto.TrackOptionDto
+import com.grooveguess.backend.domain.dto.UserAnswerDto
 import java.io.Serializable
 
 data class GameSession(
@@ -12,7 +13,8 @@ data class GameSession(
     var currentRound: Int,
     var score: Int,
     var completed: Boolean = false,
-    var wonRounds: List<Int> = emptyList()
+    var wonRounds: List<Int> = emptyList(),
+    var userAnswers: List<UserAnswerDto> = emptyList(),
 ) : Serializable
 
 data class Round(
