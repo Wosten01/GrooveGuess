@@ -32,6 +32,8 @@ import {
   ScoreDisplay,
   StyledPaper,
 } from "./GameStyledComponents";
+import { TranslationNamespace } from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 interface AnswerResult {
   correct: boolean;
@@ -43,6 +45,9 @@ interface AnswerResult {
 const TIME = 15;
 
 export const Game: React.FC = () => {
+  const { t } = useTranslation(TranslationNamespace.Common, {
+    keyPrefix: "pages.game",
+  });
   const { sessionId } = useParams<{ sessionId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -85,13 +90,11 @@ export const Game: React.FC = () => {
         .catch((error) => {
           console.error("Audio playback failed:", error);
           setShowPlayButton(true);
-          setSnackbarMessage(
-            "Couldn't play audio automatically. Click the play button to start."
-          );
+          setSnackbarMessage(t("autoplayError"));
           setSnackbarOpen(true);
         });
     }
-  }, []);
+  }, [t]);
 
   const fetchCurrentRound = useCallback(async () => {
     if (!sessionId || !authChecked || !user) return;
@@ -148,17 +151,14 @@ export const Game: React.FC = () => {
 
         setGameSession((prev) => (prev ? { ...prev, completed: true } : null));
 
-        setError(
-          "This game session is already completed. Redirecting to results..."
-        );
-
+        setError(t("gameCompleted"));
       } else {
-        setError("Failed to load the round. Please try again.");
+        setError(t("loadRoundError"));
       }
 
       setLoading(false);
     }
-  }, [authChecked, sessionId, user, playAudio]);
+  }, [authChecked, sessionId, user, playAudio, t]);
 
   const fetchNextRound = useCallback(async () => {
     if (!user || !sessionId) return;
@@ -177,24 +177,23 @@ export const Game: React.FC = () => {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         console.log("Game is already completed, redirecting to results page");
         setGameSession((prev) => (prev ? { ...prev, completed: true } : null));
-
       } else {
-        setError("Failed to load the next round. Please try again.");
+        setError(t("loadRoundError"));
       }
 
       setLoading(false);
     }
-  }, [user, sessionId, fetchCurrentRound]);
+  }, [user, sessionId, fetchCurrentRound, t]);
 
   const handleOptionSelect = useCallback(
     async (option: { id: number; title: string }) => {
       if (showResult || !gameSession || !sessionId || !user) return;
-  
+
       setSelectedOption(option);
       setSubmitting(true);
-  
+
       const userId = user.id;
-  
+
       try {
         const result = await submitAnswer(
           sessionId,
@@ -202,14 +201,13 @@ export const Game: React.FC = () => {
           gameSession.currentRoundNumber,
           option.id
         );
-  
+
         setAnswerResult(result);
         setShowResult(true);
-  
+
         if (!result.correct && gameSession.currentRound?.options) {
-       
           const correctOption = gameSession.currentRound.options.find(
-            opt => opt.id !== option.id
+            (opt) => opt.id !== option.id
           );
           if (correctOption) {
             setCorrectOptionId(correctOption.id);
@@ -217,16 +215,16 @@ export const Game: React.FC = () => {
         } else {
           setCorrectOptionId(option.id);
         }
-  
+
         if (result.correct) {
           setTotalScore((prevScore) => prevScore + result.points);
-        } 
-  
+        }
+
         if (result.isLastRound) {
           if (result.finalScore !== undefined) {
             setTotalScore(result.finalScore);
           }
-          
+
           setTimeout(() => {
             navigate(`/game/player/${userId}/session/${sessionId}/results`);
           }, 2000);
@@ -235,31 +233,34 @@ export const Game: React.FC = () => {
             fetchNextRound();
           }, 2000);
         }
-  
+
         setSubmitting(false);
       } catch (err) {
         console.error("Error submitting answer:", err);
-  
+
         if (axios.isAxiosError(err) && err.response?.status === 409) {
           console.log("Game is already completed, redirecting to results page");
-          
-          setGameSession((prev) => (prev ? { ...prev, completed: true } : null));
-          
+
+          setGameSession((prev) =>
+            prev ? { ...prev, completed: true } : null
+          );
+
           setTimeout(() => {
             navigate(`/game/player/${userId}/session/${sessionId}/results`);
           }, 1500);
         } else {
-          setError("Failed to submit your answer. Please try again.");
+          setError(t("submitAnswerError"));
         }
-  
+
         setSubmitting(false);
       }
     },
-    [gameSession, sessionId, showResult, user, fetchNextRound, navigate]
+    [gameSession, sessionId, showResult, user, fetchNextRound, navigate, t]
   );
 
   useEffect(() => {
-    if (!gameSession || !sessionId || !user || showResult || timeLeft <= 0) return;
+    if (!gameSession || !sessionId || !user || showResult || timeLeft <= 0)
+      return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -268,19 +269,17 @@ export const Game: React.FC = () => {
           if (!showResult && selectedOption) {
             handleOptionSelect(selectedOption);
           } else if (!showResult) {
-            const isLastRound = gameSession.currentRoundNumber === gameSession.totalRounds - 1;
-            
+            const isLastRound =
+              gameSession.currentRoundNumber === gameSession.totalRounds - 1;
+
             if (isLastRound) {
-              setSnackbarMessage(
-                "Time's up! This was the last round. Redirecting to results..."
-              );
+              setSnackbarMessage(t("timeUpLastRound"));
               setSnackbarOpen(true);
 
               setGameSession((prev) =>
                 prev ? { ...prev, completed: true } : null
               );
-              
-              
+
               (async () => {
                 try {
                   await submitAnswer(
@@ -289,19 +288,21 @@ export const Game: React.FC = () => {
                     gameSession.currentRoundNumber,
                     -1
                   );
-                  
+
                   setTimeout(() => {
-                    navigate(`/game/player/${user.id}/session/${sessionId}/results`);
+                    navigate(
+                      `/game/player/${user.id}/session/${sessionId}/results`
+                    );
                   }, 2000);
                 } catch (error) {
                   console.error("Error submitting timeout answer:", error);
-                  setError("Failed to submit your answer. Please try again.");
+                  setError(t("submitAnswerError"));
                 }
               })();
             } else {
-              setSnackbarMessage("Time's up! Moving to next round...");
+              setSnackbarMessage(t("timeUp"));
               setSnackbarOpen(true);
-              
+
               (async () => {
                 try {
                   await submitAnswer(
@@ -310,13 +311,13 @@ export const Game: React.FC = () => {
                     gameSession.currentRoundNumber,
                     -1
                   );
-                  
+
                   setTimeout(() => {
                     fetchNextRound();
                   }, 1500);
                 } catch (error) {
                   console.error("Error submitting timeout answer:", error);
-                  setError("Failed to submit your answer. Please try again.");
+                  setError(t("submitAnswerError"));
                 }
               })();
             }
@@ -328,7 +329,18 @@ export const Game: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameSession, navigate, sessionId, showResult, selectedOption, timeLeft, user, fetchNextRound, handleOptionSelect]);
+  }, [
+    gameSession,
+    navigate,
+    sessionId,
+    showResult,
+    selectedOption,
+    timeLeft,
+    user,
+    fetchNextRound,
+    handleOptionSelect,
+    t,
+  ]);
 
   useEffect(() => {
     if (sessionId && authChecked && user) {
@@ -359,28 +371,30 @@ export const Game: React.FC = () => {
     if (!showResult) {
       return selectedOption?.id === optionId ? "primary.main" : "transparent";
     }
-    
+
     if (optionId === correctOptionId) {
-      return "success.main"; 
+      return "success.main";
     }
-    
+
     if (selectedOption?.id === optionId && optionId !== correctOptionId) {
       return "error.main";
     }
-    
+
     return "transparent";
   };
 
- 
   const getOptionTextColor = (optionId: number) => {
     if (!showResult) {
       return selectedOption?.id === optionId ? "white" : "text.primary";
     }
-    
-    if (optionId === correctOptionId || (selectedOption?.id === optionId && optionId !== correctOptionId)) {
-      return "white"; 
+
+    if (
+      optionId === correctOptionId ||
+      (selectedOption?.id === optionId && optionId !== correctOptionId)
+    ) {
+      return "white";
     }
-    
+
     return "text.primary";
   };
 
@@ -394,7 +408,7 @@ export const Game: React.FC = () => {
       >
         <CircularProgress />
         <Typography variant="body1" sx={{ ml: 2 }}>
-          Checking authentication...
+          {t("checkingAuth")}
         </Typography>
       </Box>
     );
@@ -411,7 +425,7 @@ export const Game: React.FC = () => {
           minHeight="80vh"
         >
           <Alert severity="warning" sx={{ mb: 2 }}>
-            You need to be logged in to play the game.
+            {t("loginRequired")}
           </Alert>
           <Box
             component="button"
@@ -433,7 +447,7 @@ export const Game: React.FC = () => {
               },
             }}
           >
-            Log In
+            {t("loginButton")}
           </Box>
         </Box>
       </Fade>
@@ -451,7 +465,7 @@ export const Game: React.FC = () => {
       >
         <CircularProgress />
         <Typography variant="body1" sx={{ mt: 2 }}>
-          Loading game...
+          {t("loadingGame")}
         </Typography>
       </Box>
     );
@@ -516,8 +530,10 @@ export const Game: React.FC = () => {
               <Slide direction="down" in={true} timeout={700}>
                 <Box>
                   <Typography variant="h4" gutterBottom align="center">
-                    Round {gameSession.currentRoundNumber + 1} of{" "}
-                    {gameSession.totalRounds}
+                    {t("roundTitle", {
+                      currentRound: gameSession.currentRoundNumber + 1,
+                      totalRounds: gameSession.totalRounds,
+                    })}
                   </Typography>
 
                   <Box sx={{ mb: 1 }}>
@@ -526,7 +542,7 @@ export const Game: React.FC = () => {
                       color="textSecondary"
                       align="center"
                     >
-                      Time remaining: {timeLeft} seconds
+                      {t("timeRemaining", { seconds: timeLeft })}
                     </Typography>
                     <LinearProgress
                       variant="determinate"
@@ -567,7 +583,7 @@ export const Game: React.FC = () => {
                             },
                           }}
                         >
-                          Play Track
+                          {t("playTrack")}
                         </Button>
                       </Box>
                     )}
@@ -596,13 +612,13 @@ export const Game: React.FC = () => {
                     <Box>
                       <Typography variant="h6">
                         {answerResult.correct
-                          ? `Correct! +${answerResult.points} points`
-                          : "Wrong answer!"}
+                          ? t("correctAnswer", { points: answerResult.points })
+                          : t("wrongAnswer")}
                       </Typography>
                       <Typography variant="body2">
                         {answerResult.isLastRound
-                          ? "This was the last round! Redirecting to results..."
-                          : "Next round loading..."}
+                          ? t("lastRound")
+                          : t("nextRound")}
                       </Typography>
                     </Box>
                   </Alert>
@@ -611,7 +627,7 @@ export const Game: React.FC = () => {
 
               <Box sx={{ mb: 4, textAlign: "center" }}>
                 <Typography variant="h6" gutterBottom>
-                  Listen to the track and guess the title:
+                  {t("listenAndGuess")}
                 </Typography>
 
                 {!audioReady && !showPlayButton && (
@@ -620,14 +636,14 @@ export const Game: React.FC = () => {
                   >
                     <CircularProgress size={24} />
                     <Typography variant="body2" sx={{ ml: 1 }}>
-                      Loading audio...
+                      {t("loadingAudio")}
                     </Typography>
                   </Box>
                 )}
               </Box>
 
               <Typography variant="h6" gutterBottom align="center">
-                Select your answer:
+                {t("selectAnswer")}
               </Typography>
 
               <Grid container spacing={2}>
@@ -657,7 +673,9 @@ export const Game: React.FC = () => {
                             px: 2,
                             borderRadius: 3,
                             textAlign: "center",
-                            backgroundColor: getOptionBackgroundColor(option.id),
+                            backgroundColor: getOptionBackgroundColor(
+                              option.id
+                            ),
                             color: getOptionTextColor(option.id),
                             border: "1px solid",
                             borderColor: showResult
@@ -686,10 +704,11 @@ export const Game: React.FC = () => {
                             sx={{
                               fontSize: "1rem",
                               fontWeight:
-                                selectedOption?.id === option.id || option.id === correctOptionId
+                                selectedOption?.id === option.id ||
+                                option.id === correctOptionId
                                   ? "medium"
                                   : "normal",
-                              color: getOptionTextColor(option.id), 
+                              color: getOptionTextColor(option.id),
                             }}
                           >
                             {option.title} - {option.artist}
@@ -709,7 +728,7 @@ export const Game: React.FC = () => {
               <ScoreDisplay>
                 <Box sx={{ textAlign: "right" }}>
                   <Typography variant="body2" color="textSecondary">
-                    Total Score
+                    {t("totalScore")}
                   </Typography>
                   <Typography variant="h6">{totalScore}</Typography>
                 </Box>

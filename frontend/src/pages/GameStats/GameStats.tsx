@@ -27,6 +27,8 @@ import {
   RecentGameDto,
   GameStatsDto,
 } from "../../api/game-stats-api";
+import { useTranslation } from 'react-i18next';
+import { TranslationNamespace } from '../../i18n';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,21 +52,8 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const getAccuracyLabel = (accuracy: number): string => {
-  if (accuracy >= 80) return "Excellent";
-  if (accuracy >= 60) return "Good";
-  if (accuracy >= 40) return "Average";
-  return "Poor";
-};
-
-const getAccuracyColor = (accuracy: number): string => {
-  if (accuracy >= 80) return "success";
-  if (accuracy >= 60) return "info";
-  if (accuracy >= 40) return "warning";
-  return "error";
-};
-
 export const GameStats: React.FC = () => {
+  const { t } = useTranslation(TranslationNamespace.Common, { keyPrefix: 'pages.gameStats' });
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
@@ -76,6 +65,20 @@ export const GameStats: React.FC = () => {
 
   const [recentGames, setRecentGames] = useState<RecentGameDto[]>([]);
   const [userStats, setUserStats] = useState<GameStatsDto | null>(null);
+
+  const getAccuracyLabel = (accuracy: number): string => {
+    if (accuracy >= 80) return t('accuracyLabels.excellent');
+    if (accuracy >= 60) return t('accuracyLabels.good');
+    if (accuracy >= 40) return t('accuracyLabels.average');
+    return t('accuracyLabels.poor');
+  };
+  
+  const getAccuracyColor = (accuracy: number): string => {
+    if (accuracy >= 80) return "success";
+    if (accuracy >= 60) return "info";
+    if (accuracy >= 40) return "warning";
+    return "error";
+  };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -143,7 +146,7 @@ export const GameStats: React.FC = () => {
         <Card>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography color="textSecondary" gutterBottom>
-              Total Games
+              {t('stats.totalGames')}
             </Typography>
             <Typography variant="h3" component="div" color="primary">
               {stats.totalGames}
@@ -155,7 +158,7 @@ export const GameStats: React.FC = () => {
         <Card>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography color="textSecondary" gutterBottom>
-              Average Score
+              {t('stats.averageScore')}
             </Typography>
             <Typography variant="h3" component="div" color="primary">
               {stats.averageScore}
@@ -167,7 +170,7 @@ export const GameStats: React.FC = () => {
         <Card>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography color="textSecondary" gutterBottom>
-              Highest Score
+              {t('stats.highestScore')}
             </Typography>
             <Typography variant="h3" component="div" color="primary">
               {stats.highestScore}
@@ -179,7 +182,7 @@ export const GameStats: React.FC = () => {
         <Card>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography color="textSecondary" gutterBottom>
-              Total Score
+              {t('stats.totalScore')}
             </Typography>
             <Typography variant="h3" component="div" color="primary">
               {stats.totalScore}
@@ -192,7 +195,7 @@ export const GameStats: React.FC = () => {
         <Card>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography color="textSecondary" gutterBottom>
-              Accuracy
+              {t('stats.accuracy')}
             </Typography>
 
             <Box
@@ -224,11 +227,11 @@ export const GameStats: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Player</TableCell>
-              <TableCell>Quiz</TableCell>
-              <TableCell>Score</TableCell>
-              <TableCell>Accuracy</TableCell>
+              <TableCell>{t('table.date')}</TableCell>
+              <TableCell>{t('table.player')}</TableCell>
+              <TableCell>{t('table.quiz', { id: '' })}</TableCell>
+              <TableCell>{t('table.score')}</TableCell>
+              <TableCell>{t('table.accuracy')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -249,7 +252,7 @@ export const GameStats: React.FC = () => {
                 >
                   <TableCell>{formatDate(game.timestamp)}</TableCell>
                   <TableCell>{game.username}</TableCell>
-                  <TableCell>Quiz #{game.quizId}</TableCell>
+                  <TableCell>{t('table.quiz', { id: game.quizId })}</TableCell>
                   <TableCell>{game.score}</TableCell>
                   <TableCell>
                     <Tooltip title={getAccuracyLabel(accuracy)}>
@@ -288,18 +291,18 @@ export const GameStats: React.FC = () => {
     return (
       <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Game Statistics
+          {t('title')}
         </Typography>
         <Paper sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="h6" gutterBottom>
-            Please log in to view game statistics
+            {t('loginRequired')}
           </Typography>
           <Button
             variant="contained"
             color="primary"
             onClick={() => navigate("/login", { state: { from: "/stats" } })}
           >
-            Log In
+            {t('loginButton')}
           </Button>
         </Paper>
       </Box>
@@ -322,7 +325,7 @@ export const GameStats: React.FC = () => {
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Game Statistics
+        {t('title')}
       </Typography>
 
       <Paper sx={{ width: "100%", mb: 4 }}>
@@ -333,8 +336,8 @@ export const GameStats: React.FC = () => {
           textColor="primary"
           centered
         >
-          <Tab label="Recent Games" />
-          <Tab label="My Statistics" />
+          <Tab label={t('tabs.recentGames')} />
+          <Tab label={t('tabs.myStatistics')} />
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -346,7 +349,7 @@ export const GameStats: React.FC = () => {
             renderGamesTable(recentGames)
           ) : (
             <Typography variant="body1" color="textSecondary" align="center">
-              No recent games found.
+              {t('noGames')}
             </Typography>
           )}
         </TabPanel>
@@ -360,7 +363,7 @@ export const GameStats: React.FC = () => {
             <>{renderStatsCards(userStats)}</>
           ) : (
             <Typography variant="body1" color="textSecondary" align="center">
-              No statistics available.
+              {t('noStats')}
             </Typography>
           )}
         </TabPanel>

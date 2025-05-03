@@ -19,12 +19,15 @@ import {
 import { AxiosError } from 'axios';
 import { getGameResults, GameResultsDto, TrackOptionDto } from '../../api/quiz-game-api';
 import { useAuth } from '../../hooks/auth-context';
+import { useTranslation } from 'react-i18next';
+import { TranslationNamespace } from '../../i18n';
 
 interface ErrorResponse {
   message: string;
 }
 
 export const GameResults: React.FC = () => {
+  const { t } = useTranslation(TranslationNamespace.Common, { keyPrefix: 'pages.gameResults' });
   const { sessionId } = useParams<{ sessionId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -55,7 +58,7 @@ export const GameResults: React.FC = () => {
         const axiosError = err as AxiosError<ErrorResponse>;
         const errorMessage = axiosError.response?.data?.message || 
                             axiosError.message || 
-                            'Failed to load game results';
+                            t('fetchError');
         
         setError(errorMessage);
         setLoading(false);
@@ -65,7 +68,7 @@ export const GameResults: React.FC = () => {
     if (authChecked && user) {
       fetchResults();
     }
-  }, [authChecked, user, sessionId]);
+  }, [authChecked, user, sessionId, t]);
 
   const handlePlayAgain = () => {
     navigate('/quizzes');
@@ -91,7 +94,7 @@ export const GameResults: React.FC = () => {
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
         <CircularProgress />
         <Typography variant="body1" sx={{ ml: 2 }}>
-          Checking authentication...
+          {t('checkingAuth')}
         </Typography>
       </Box>
     );
@@ -101,14 +104,14 @@ export const GameResults: React.FC = () => {
     return (
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="80vh">
         <Alert severity="warning" sx={{ mb: 2 }}>
-          You need to be logged in to view game results.
+          {t('loginRequired')}
         </Alert>
         <Button 
           variant="contained" 
           color="primary"
           onClick={() => navigate("/login", { state: { from: window.location.pathname } })}
         >
-          Log In
+          {t('loginButton')}
         </Button>
       </Box>
     );
@@ -143,7 +146,9 @@ export const GameResults: React.FC = () => {
   const TrackDisplay = ({ title, artist }: { title: string, artist: string }) => (
     <>
       <Typography variant="body2">{title}</Typography>
-      <Typography variant="caption" color="textSecondary">by {artist}</Typography>
+      <Typography variant="caption" color="textSecondary">
+        {t('by')} {artist}
+      </Typography>
     </>
   );
 
@@ -153,10 +158,10 @@ export const GameResults: React.FC = () => {
         <>
           <Paper elevation={3} sx={{ p: 3, mb: 3, textAlign: 'center' }}>
             <Typography variant="h4" gutterBottom>
-              Game Results
+              {t('title')}
             </Typography>
             <Typography variant="h5" gutterBottom>
-              Quiz #{results.quizId}
+              {t('quizNumber', { id: results.quizId })}
             </Typography>
             
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, my: 3 }}>
@@ -165,7 +170,7 @@ export const GameResults: React.FC = () => {
                   {results.score}
                 </Typography>
                 <Typography variant="body1">
-                  Final Score
+                  {t('finalScore')}
                 </Typography>
               </Box>
               
@@ -176,7 +181,7 @@ export const GameResults: React.FC = () => {
                   {stats.accuracy}%
                 </Typography>
                 <Typography variant="body1">
-                  Accuracy
+                  {t('accuracy')}
                 </Typography>
               </Box>
               
@@ -187,7 +192,7 @@ export const GameResults: React.FC = () => {
                   {stats.correctAnswers}/{results.totalRounds}
                 </Typography>
                 <Typography variant="body1">
-                  Correct Answers
+                  {t('correctAnswers')}
                 </Typography>
               </Box>
             </Box>
@@ -195,17 +200,17 @@ export const GameResults: React.FC = () => {
           
           <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
             <Typography variant="h5" gutterBottom>
-              Round Details
+              {t('roundDetails')}
             </Typography>
             
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Round</TableCell>
-                    <TableCell>Correct Track</TableCell>
-                    <TableCell>Your Answer</TableCell>
-                    <TableCell>Result</TableCell>
+                    <TableCell>{t('round')}</TableCell>
+                    <TableCell>{t('correctTrack')}</TableCell>
+                    <TableCell>{t('yourAnswer')}</TableCell>
+                    <TableCell>{t('result')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -227,14 +232,14 @@ export const GameResults: React.FC = () => {
                           {userAnswerOption ? (
                             <TrackDisplay title={userAnswerOption.title} artist={userAnswerOption.artist} />
                           ) : (
-                            <Typography variant="body2" color="text.secondary">No answer</Typography>
+                            <Typography variant="body2" color="text.secondary">{t('noAnswer')}</Typography>
                           )}
                         </TableCell>
                         <TableCell>
                           {track.wasGuessed ? (
-                            <Chip label="Correct" color="success" size="small" />
+                            <Chip label={t('correct')} color="success" size="small" />
                           ) : (
-                            <Chip label="Incorrect" color="error" size="small" />
+                            <Chip label={t('incorrect')} color="error" size="small" />
                           )}
                         </TableCell>
                       </TableRow>
@@ -252,7 +257,7 @@ export const GameResults: React.FC = () => {
               size="large"
               onClick={handlePlayAgain}
             >
-              Play Another Quiz
+              {t('playAgain')}
             </Button>
             <Button 
               variant="outlined" 
@@ -260,7 +265,7 @@ export const GameResults: React.FC = () => {
               size="large"
               onClick={handleViewScoreboard}
             >
-              View Scoreboard
+              {t('viewScoreboard')}
             </Button>
           </Box>
         </>
