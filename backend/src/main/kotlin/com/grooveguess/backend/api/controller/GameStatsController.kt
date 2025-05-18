@@ -6,7 +6,9 @@ import com.grooveguess.backend.domain.dto.PaginatedStatsResponseDto
 import com.grooveguess.backend.service.GameStatsService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.core.io.Resource
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 
 @RestController
 @RequestMapping("/api/game-stats")
@@ -36,5 +38,26 @@ class GameStatsController(private val gameStatsService: GameStatsService) {
         )
         
         return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/export")
+    fun exportPlayerStats(
+        @RequestParam(required = true) userId: Long,
+        @RequestParam(defaultValue = "json") format: String,
+        @RequestParam(defaultValue = "100") gamesLimit: Int
+    ): ResponseEntity<Resource> {
+        logger.debug("Export request received with userId: $userId, format: $format")
+        
+        return try {
+            gameStatsService.exportPlayerStats(userId, format, gamesLimit)
+        } catch (e: IllegalArgumentException) {
+            logger.error("Error exporting player stats: ${e.message}")
+            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(null)
+        } catch (e: Exception) {
+            logger.error("Unexpected error exporting player stats: ${e.message}", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null)
+        }
     }
 }

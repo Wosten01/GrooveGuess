@@ -1,19 +1,19 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from "axios";
 import Cookies from 'js-cookie'; 
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 const JWT_COOKIE_NAME = "jwt";
 
-const apiClient: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
-function getJwtToken(): string | null {
+export function getJwtToken(): string | null {
   try {
     return Cookies.get(JWT_COOKIE_NAME) || null;
   } catch (error) {

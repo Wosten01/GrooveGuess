@@ -19,6 +19,10 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/auth-context";
@@ -26,9 +30,13 @@ import {
   getRecentGames,
   RecentGameDto,
   GameStatsDto,
+  exportPlayerStats,
 } from "../../api/game-stats-api";
 import { useTranslation } from 'react-i18next';
 import { TranslationNamespace } from '../../i18n';
+import DownloadIcon from '@mui/icons-material/Download';
+import JsonIcon from '@mui/icons-material/Code';
+import CsvIcon from '@mui/icons-material/TableChart';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,6 +66,7 @@ export const GameStats: React.FC = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
@@ -65,6 +74,10 @@ export const GameStats: React.FC = () => {
 
   const [recentGames, setRecentGames] = useState<RecentGameDto[]>([]);
   const [userStats, setUserStats] = useState<GameStatsDto | null>(null);
+  
+  // Export menu state
+  const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
+  const exportMenuOpen = Boolean(exportAnchorEl);
 
   const getAccuracyLabel = (accuracy: number): string => {
     if (accuracy >= 80) return t('accuracyLabels.excellent');
@@ -87,6 +100,29 @@ export const GameStats: React.FC = () => {
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value - 1);
+  };
+  
+  // Export menu handlers
+  const handleExportClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setExportAnchorEl(event.currentTarget);
+  };
+  
+  const handleExportClose = () => {
+    setExportAnchorEl(null);
+  };
+  
+  const handleExportFormat = async (format: 'json' | 'csv') => {
+    if (!user) return;
+    
+    setExportLoading(true);
+    try {
+      await exportPlayerStats(user.id!, format);
+    } catch (error) {
+      console.error(`Error exporting stats as ${format}:`, error);
+    } finally {
+      setExportLoading(false);
+      handleExportClose();
+    }
   };
 
   useEffect(() => {
@@ -319,9 +355,42 @@ export const GameStats: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        {t('title')}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          {t('title')}
+        </Typography>
+        
+        {/* Export Button */}
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<DownloadIcon />}
+          onClick={handleExportClick}
+          disabled={exportLoading}
+        >
+          {exportLoading ? <CircularProgress size={24} /> : t('exportButton')}
+        </Button>
+        
+        {/* Export Format Menu */}
+        <Menu
+          anchorEl={exportAnchorEl}
+          open={exportMenuOpen}
+          onClose={handleExportClose}
+        >
+          <MenuItem onClick={() => handleExportFormat('json')}>
+            <ListItemIcon>
+              <JsonIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>JSON</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => handleExportFormat('csv')}>
+            <ListItemIcon>
+              <CsvIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>CSV</ListItemText>
+          </MenuItem>
+        </Menu>
+      </Box>
 
       <Paper sx={{ width: "100%", mb: 4 }}>
         <Tabs
