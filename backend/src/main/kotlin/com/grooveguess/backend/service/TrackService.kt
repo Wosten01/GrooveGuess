@@ -1,4 +1,3 @@
-
 package com.grooveguess.backend.service
 
 import com.grooveguess.backend.domain.dto.TrackDto
@@ -6,6 +5,7 @@ import com.grooveguess.backend.domain.model.Track
 import com.grooveguess.backend.domain.repository.TrackRepository
 import com.grooveguess.backend.domain.repository.QuizRepository
 import org.apache.hc.client5.http.classic.methods.HttpHead
+import org.apache.hc.client5.http.classic.methods.HttpGet
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.core5.http.HttpStatus
@@ -35,11 +35,22 @@ class TrackService(
     private val validAudioMimeTypes =
         setOf(
             "audio/mpeg",
+            "audio/mp3",
             "audio/wav",
             "audio/ogg",
             "audio/aac",
             "audio/flac",
             "audio/webm",
+        )
+    
+    private val validAudioExtensions =
+        setOf(
+            ".mp3",
+            ".wav",
+            ".ogg",
+            ".aac",
+            ".flac",
+            ".webm",
         )
 
     fun create(
@@ -180,7 +191,24 @@ class TrackService(
                     )
                 }
 
-            // Шаг 1: Выполняем HEAD-запрос для проверки Content-Type
+            // Special handling for Dropbox URLs
+            if (url.contains("dropbox.com")) {
+                logger.debug("Detected Dropbox URL, checking file extension")
+                // Check if the URL has a valid audio file extension
+                val hasValidExtension = validAudioExtensions.any { extension ->
+                    url.lowercase().endsWith(extension)
+                }
+                
+                if (hasValidExtension) {
+                    logger.debug("Dropbox URL has valid audio extension")
+                    return AudioVerificationResult(
+                        isValid = true,
+                        mimeType = "audio/mpeg", // Assuming MP3 as default for Dropbox links
+                    )
+                }
+            }
+
+            // Standard verification for other URLs
             HttpClients.createDefault().use { client: CloseableHttpClient ->
                 val request = HttpHead(parsedUrl)
                 val response = client.execute(request, null) { response -> response }
@@ -195,6 +223,27 @@ class TrackService(
                 }
 
                 val contentType = response.getFirstHeader("Content-Type")?.value
+                
+                // If content type is application/json but URL is from Dropbox and has dl=1 parameter
+                // This is a special case for Dropbox direct download links
+                if (contentType?.contains("application/json") == true && 
+                    url.contains("dropbox.com") && 
+                    (url.contains("dl=1") || url.contains("dl=0"))) {
+                    
+                    logger.debug("Dropbox URL with application/json content type, checking file extension")
+                    val hasValidExtension = validAudioExtensions.any { extension ->
+                        url.lowercase().contains(extension)
+                    }
+                    
+                    if (hasValidExtension) {
+                        logger.debug("Dropbox URL has valid audio extension")
+                        return AudioVerificationResult(
+                            isValid = true,
+                            mimeType = "audio/mpeg", // Assuming MP3 as default for Dropbox links
+                        )
+                    }
+                }
+                
                 if (contentType == null || !validAudioMimeTypes.any { contentType.contains(it) }) {
                     logger.warn("Invalid or missing Content-Type for URL $url: $contentType")
                     return AudioVerificationResult(

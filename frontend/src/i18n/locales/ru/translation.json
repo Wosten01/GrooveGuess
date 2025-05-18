@@ -170,6 +170,7 @@
       "loadingGame": "Загрузка игры...",
       "roundTitle": "Раунд {{currentRound}} из {{totalRounds}}",
       "timeRemaining": "Оставшееся время: {{seconds}} секунд",
+      "waitingForAudio": "Загрузка аудио-файла, пожалуйста подождите",
       "playTrack": "Воспроизвести трек",
       "loadingAudio": "Загрузка аудио...",
       "listenAndGuess": "Прослушайте трек и угадайте название:",

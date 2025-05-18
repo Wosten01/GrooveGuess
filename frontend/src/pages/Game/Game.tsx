@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -52,6 +53,8 @@ export const Game: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Add a ref to track if a timeout submission is in progress
+  const timeoutSubmissionInProgress = useRef<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +76,7 @@ export const Game: React.FC = () => {
   const [maxTime, setMaxTime] = useState<number>(TIME);
   const [showPlayButton, setShowPlayButton] = useState<boolean>(false);
   const [correctOptionId, setCorrectOptionId] = useState<number | null>(null);
+  const [timerActive, setTimerActive] = useState<boolean>(false);
 
   useEffect(() => {
     if (user !== undefined) {
@@ -80,8 +84,20 @@ export const Game: React.FC = () => {
     }
   }, [user]);
 
+  // Start timer only when audio is ready
+  useEffect(() => {
+    if (audioReady && !timerActive) {
+      setTimerActive(true);
+    }
+  }, [audioReady, timerActive]);
+
   const playAudio = useCallback(() => {
     if (audioRef.current) {
+      // For Safari compatibility, ensure audio is properly loaded
+      if (audioRef.current.readyState < 2) {  // HAVE_CURRENT_DATA or higher
+        audioRef.current.load();
+      }
+      
       audioRef.current
         .play()
         .then(() => {
@@ -110,9 +126,14 @@ export const Game: React.FC = () => {
       setAudioReady(false);
       setShowPlayButton(false);
       setCorrectOptionId(null);
+      setTimerActive(false);
+      // Reset the timeout submission flag
+      timeoutSubmissionInProgress.current = false;
 
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.removeAttribute('src');
+        audioRef.current.load();
       }
 
       const response = await getCurrentRound(sessionId, userId);
@@ -126,19 +147,52 @@ export const Game: React.FC = () => {
       setMaxTime(roundTimeLimit);
 
       if (response.data.currentRound?.url) {
+        // Process Dropbox URL if needed
+        let audioUrl = response.data.currentRound.url;
+        if (audioUrl.includes('dropbox.com')) {
+          if (audioUrl.includes('dl=0')) {
+            audioUrl = audioUrl.replace('dl=0', 'dl=1');
+          } else if (!audioUrl.includes('dl=')) {
+            audioUrl = audioUrl.includes('?') ? `${audioUrl}&dl=1` : `${audioUrl}?dl=1`;
+          }
+        }
+
         if (audioRef.current) {
-          audioRef.current.src = response.data.currentRound.url;
+          // Remove any existing event listeners to prevent duplicates
+          const oldAudio = audioRef.current;
+          oldAudio.oncanplaythrough = null;
+          oldAudio.onerror = null;
+          
+          audioRef.current.src = audioUrl;
+          audioRef.current.preload = "auto"; // Ensure preloading for Safari
           audioRef.current.load();
-          audioRef.current.addEventListener("canplaythrough", () => {
+          
+          audioRef.current.oncanplaythrough = () => {
             setAudioReady(true);
             playAudio();
-          });
+          };
+          
+          audioRef.current.onerror = (e) => {
+            console.error("Audio loading error:", e);
+            setShowPlayButton(true);
+            setSnackbarMessage(t("audioLoadError"));
+            setSnackbarOpen(true);
+          };
         } else {
-          audioRef.current = new Audio(response.data.currentRound.url);
-          audioRef.current.addEventListener("canplaythrough", () => {
+          audioRef.current = new Audio(audioUrl);
+          audioRef.current.preload = "auto";
+          
+          audioRef.current.oncanplaythrough = () => {
             setAudioReady(true);
             playAudio();
-          });
+          };
+          
+          audioRef.current.onerror = (e) => {
+            console.error("Audio loading error:", e);
+            setShowPlayButton(true);
+            setSnackbarMessage(t("audioLoadError"));
+            setSnackbarOpen(true);
+          };
         }
       }
 
@@ -268,8 +322,62 @@ export const Game: React.FC = () => {
     ]
   );
 
+  // Handle timeout submission
+  const handleTimeoutSubmission = useCallback(async () => {
+    if (!gameSession || !sessionId || !user || timeoutSubmissionInProgress.current) return;
+    
+    // Set flag to prevent duplicate submissions
+    timeoutSubmissionInProgress.current = true;
+    
+    const isLastRound = gameSession.currentRoundNumber === gameSession.totalRounds - 1;
+
+    if (isLastRound) {
+      setSnackbarMessage(t("timeUpLastRound"));
+      setSnackbarOpen(true);
+      setGameSession((prev) => prev ? { ...prev, completed: true } : null);
+
+      try {
+        await submitAnswer(
+          sessionId,
+          user.id!,
+          gameSession.currentRoundNumber,
+          -1
+        );
+
+        setTimeout(() => {
+          navigate(`/game/player/${user.id}/session/${sessionId}/results`);
+        }, 2000);
+      } catch (error) {
+        console.error("Error submitting timeout answer:", error);
+        setError(t("submitAnswerError"));
+        timeoutSubmissionInProgress.current = false;
+      }
+    } else {
+      setSnackbarMessage(t("timeUp"));
+      setSnackbarOpen(true);
+
+      try {
+        await submitAnswer(
+          sessionId,
+          user.id!,
+          gameSession.currentRoundNumber,
+          -1
+        );
+
+        setTimeout(() => {
+          fetchNextRound();
+        }, 1500);
+      } catch (error) {
+        console.error("Error submitting timeout answer:", error);
+        setError(t("submitAnswerError"));
+        timeoutSubmissionInProgress.current = false;
+      }
+    }
+  }, [gameSession, sessionId, user, navigate, fetchNextRound, t]);
+
   useEffect(() => {
-    if (!gameSession || !sessionId || !user || showResult || timeLeft <= 0)
+    // Only start the timer if audio is ready (or play button is shown) and timer should be active
+    if (!gameSession || !sessionId || !user || showResult || timeLeft <= 0 || !timerActive)
       return;
 
     const timer = setInterval(() => {
@@ -279,58 +387,7 @@ export const Game: React.FC = () => {
           if (!showResult && selectedOption) {
             handleOptionSelect(selectedOption);
           } else if (!showResult) {
-            const isLastRound =
-              gameSession.currentRoundNumber === gameSession.totalRounds - 1;
-
-            if (isLastRound) {
-              setSnackbarMessage(t("timeUpLastRound"));
-              setSnackbarOpen(true);
-
-              setGameSession((prev) =>
-                prev ? { ...prev, completed: true } : null
-              );
-
-              (async () => {
-                try {
-                  await submitAnswer(
-                    sessionId,
-                    user.id!,
-                    gameSession.currentRoundNumber,
-                    -1
-                  );
-
-                  setTimeout(() => {
-                    navigate(
-                      `/game/player/${user.id}/session/${sessionId}/results`
-                    );
-                  }, 2000);
-                } catch (error) {
-                  console.error("Error submitting timeout answer:", error);
-                  setError(t("submitAnswerError"));
-                }
-              })();
-            } else {
-              setSnackbarMessage(t("timeUp"));
-              setSnackbarOpen(true);
-
-              (async () => {
-                try {
-                  await submitAnswer(
-                    sessionId,
-                    user.id!,
-                    gameSession.currentRoundNumber,
-                    -1
-                  );
-
-                  setTimeout(() => {
-                    fetchNextRound();
-                  }, 1500);
-                } catch (error) {
-                  console.error("Error submitting timeout answer:", error);
-                  setError(t("submitAnswerError"));
-                }
-              })();
-            }
+            handleTimeoutSubmission();
           }
           return 0;
         }
@@ -341,15 +398,14 @@ export const Game: React.FC = () => {
     return () => clearInterval(timer);
   }, [
     gameSession,
-    navigate,
     sessionId,
     showResult,
     selectedOption,
     timeLeft,
     user,
-    fetchNextRound,
     handleOptionSelect,
-    t,
+    handleTimeoutSubmission,
+    timerActive,
   ]);
 
   useEffect(() => {
@@ -553,11 +609,11 @@ export const Game: React.FC = () => {
                       color="textSecondary"
                       align="center"
                     >
-                      {t("timeRemaining", { seconds: timeLeft })}
+                      {!timerActive ? t("waitingForAudio") : t("timeRemaining", { seconds: timeLeft })}
                     </Typography>
                     <LinearProgress
-                      variant="determinate"
-                      value={(timeLeft / maxTime) * 100}
+                      variant={timerActive ? "determinate" : "indeterminate"}
+                      value={timerActive ? (timeLeft / maxTime) * 100 : undefined}
                       sx={{
                         mt: 1,
                         mb: 3,
@@ -575,7 +631,13 @@ export const Game: React.FC = () => {
                           variant="contained"
                           color="primary"
                           startIcon={<PlayArrowIcon />}
-                          onClick={playAudio}
+                          onClick={() => {
+                            playAudio();
+                            // Start timer when play button is clicked
+                            if (!timerActive) {
+                              setTimerActive(true);
+                            }
+                          }}
                           sx={{
                             borderRadius: 20,
                             px: 3,
@@ -664,13 +726,13 @@ export const Game: React.FC = () => {
                       <OptionButton
                         whileHover={{
                           scale:
-                            timeLeft > 0 && !showResult && !submitting
+                            timeLeft > 0 && !showResult && !submitting && timerActive
                               ? 1.02
                               : 1,
                         }}
                         whileTap={{
                           scale:
-                            timeLeft > 0 && !showResult && !submitting
+                            timeLeft > 0 && !showResult && !submitting && timerActive
                               ? 0.98
                               : 1,
                         }}
@@ -686,13 +748,14 @@ export const Game: React.FC = () => {
                           timeLeft > 0 &&
                           !showResult &&
                           !submitting &&
+                          timerActive &&
                           handleOptionSelect(option)
                         }
                         style={{
                           width: "100%",
                           height: "100%",
                           cursor:
-                            timeLeft > 0 && !showResult && !submitting
+                            timeLeft > 0 && !showResult && !submitting && timerActive
                               ? "pointer"
                               : "default",
                         }}
@@ -717,11 +780,11 @@ export const Game: React.FC = () => {
                               : "primary.main",
                             boxShadow: selectedOption?.id === option.id ? 3 : 0,
                             cursor:
-                              timeLeft > 0 && !showResult && !submitting
+                              timeLeft > 0 && !showResult && !submitting && timerActive
                                 ? "pointer"
                                 : "default",
                             opacity:
-                              timeLeft <= 0 || showResult || submitting
+                              timeLeft <= 0 || showResult || submitting || !timerActive
                                 ? 0.7
                                 : 1,
                             transition: "all 0.2s ease",
@@ -731,7 +794,7 @@ export const Game: React.FC = () => {
                             justifyContent: "center",
                             "&:hover": {
                               backgroundColor:
-                                timeLeft > 0 && !showResult && !submitting
+                                timeLeft > 0 && !showResult && !submitting && timerActive
                                   ? selectedOption?.id === option.id
                                     ? "primary.dark"
                                     : "rgba(0, 0, 0, 0.04)"
