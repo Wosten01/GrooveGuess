@@ -5,7 +5,7 @@ version: 2
 updates:
   # Check for updates to npm packages
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/frontend"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
@@ -45,8 +45,8 @@ updates:
       - "docker"
 
   # Maven dependencies
-  - package-ecosystem: "maven"
-    directory: "/"
+  - package-ecosystem: "gradle"
+    directory: "/backend"
     schedule:
       interval: "weekly"
     labels:
